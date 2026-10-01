@@ -1,0 +1,93 @@
+---
+import Base from '../../layouts/Base.astro';
+import tracks from '../../data/tracks.json';
+export function getStaticPaths() {
+  return tracks.map((t) => ({ params: { id: t.id }, props: { t } }));
+}
+const { t } = Astro.props;
+// TODO: reemplazar los emojis por imágenes (ej. /img/items/champinon.png, pluma.png, bala.png)
+const categorias = [
+  { key: 'nisc', texto: 'NISC', icono: null },
+  { key: 'champinon', texto: 'Champiñón', icono: '🍄' },
+  { key: 'pluma', texto: 'Pluma', icono: '🪶' },
+] as const;
+---
+<Base titulo={`${t.nombre} · MKW Shortcuts and strategies`}>
+  <a href="/">← Volver al mapa</a>
+
+  <header class="cabecera">
+    <img src={t.icono} alt="" />
+    <h1>{t.nombre}</h1>
+  </header>
+
+  <h2>Estrategia</h2>
+  <p class="estrategia">{t.estrategia}</p>
+
+  <div class="acciones">
+    <button class="btn" id="btn-atajo" aria-pressed="false">Atajo</button>
+    <!-- TODO: reemplazar 🚀 por la imagen del ítem Bala -->
+    <button class="btn" id="btn-bala" aria-pressed="false"><span class="ph">🚀</span> Bala</button>
+  </div>
+
+  <!-- MINI MENÚ DE ATAJOS -->
+  <div id="mini" class="mini oculto">
+    {categorias.map((c) => (
+      <button class="btn" data-cat={c.key} aria-pressed="false">
+        {c.icono && <span class="ph">{c.icono}</span>}{c.texto}
+      </button>
+    ))}
+  </div>
+
+  <!-- LISTAS DE ATAJOS: clip a la izquierda, descripción a la derecha -->
+  {categorias.map((c) => (
+    <section class="lista oculto" id={`lista-${c.key}`}>
+      {t.atajos[c.key].map((a) => (
+        <article class="atajo">
+          {/* Para añadir un clip: pon la ruta/URL del .mp4 en "clip" dentro de tracks.json
+              (ej. "/img/clips/mi-clip.mp4" o la URL pública de R2) */}
+          {a.clip
+            ? <video class="clip" src={a.clip} controls preload="none"></video>
+            : <div class="clip">Clip pendiente</div>}
+          <div>
+            <h3>{a.titulo}</h3>
+            <p>{a.descripcion}</p>
+          </div>
+        </article>
+      ))}
+    </section>
+  ))}
+
+  <!-- MINIMAPA CON LA BALA: ajusta posBala {x,y} (%) en tracks.json -->
+  <section id="panel-bala" class="oculto">
+    <div class="minimapa">
+      <img src={t.minimapa} alt={`Minimapa de ${t.nombre}`} />
+      <span class="bala" style={`left:${t.posBala.x}%;top:${t.posBala.y}%`}>🚀</span>
+    </div>
+  </section>
+
+  <script>
+    const $ = (s: string) => document.querySelector<HTMLElement>(s)!;
+    const btnAtajo = $('#btn-atajo'), btnBala = $('#btn-bala'), mini = $('#mini'), bala = $('#panel-bala');
+    const ocultarListas = () => document.querySelectorAll('.lista').forEach((l) => l.classList.add('oculto'));
+    const marcar = (el: Element, on: boolean) => el.setAttribute('aria-pressed', String(on));
+
+    btnAtajo.addEventListener('click', () => {
+      mini.classList.toggle('oculto');
+      bala.classList.add('oculto'); marcar(btnBala, false);
+      const abierto = !mini.classList.contains('oculto');
+      marcar(btnAtajo, abierto);
+      if (!abierto) ocultarListas();
+    });
+    btnBala.addEventListener('click', () => {
+      const abrir = bala.classList.toggle('oculto') === false;
+      marcar(btnBala, abrir);
+      if (abrir) { mini.classList.add('oculto'); ocultarListas(); marcar(btnAtajo, false); }
+    });
+    document.querySelectorAll<HTMLElement>('[data-cat]').forEach((b) => b.addEventListener('click', () => {
+      ocultarListas();
+      document.querySelectorAll('[data-cat]').forEach((x) => marcar(x, false));
+      marcar(b, true);
+      $(`#lista-${b.dataset.cat}`).classList.remove('oculto');
+    }));
+  </script>
+</Base>
