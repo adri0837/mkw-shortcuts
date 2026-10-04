@@ -36,7 +36,18 @@ const atajos = r.atajos ?? [];
 
   {r.estrategia && (
     <>
-      <h2>Estrategia</h2>
+      <div class="bloque-estrategia">
+        <h2 class="titulo-estrategia">
+          Estrategia
+          <button class="ayuda" aria-label="Qué es cada perfil"></button>
+        </h2>
+        <div class="roles">
+          <p><strong>Runner:</strong> Mejor posición de inicio, primer lugar y correr.</p>
+          <p><strong>Shroomer:</strong> Mejor iniciar en posiciones bajas o medias, conseguir champiñones, tomar atajos y correr.</p>
+          <p><strong>Drafter:</strong> Mejor conseguir rebufos al iniciar la carrera, y entonces correr.</p>
+          <p><strong>Bagger:</strong> Mejor quedarse en posiciones bajas y usar tus objetos para remontar al final.</p>
+        </div>
+      </div>
       <p class="estrategia">{r.estrategia}</p>
     </>
   )}
@@ -45,14 +56,16 @@ const atajos = r.atajos ?? [];
     <>
       <div class="acciones">
         <button class="btn" id="btn-atajo" aria-pressed="false">Atajos de la ruta</button>
-      </div>
-
-      <div id="mini" class="mini oculto">
-        {atajos.map((c) => (
-          <button class="btn" data-cat={c.id} aria-pressed="false">
-            {c.icono && <span class="ph"><img src={`/img/items/${c.icono}`} alt="" /></span>}{c.nombre}
-          </button>
-        ))}
+        {/* El .mini va DENTRO de .acciones a proposito: es el ancla del popup, y
+            un position:absolute solo toma como ancla un ancestro. Como hermano se
+            leia contra el viewport y caia a la esquina inferior izquierda. */}
+        <div id="mini" class="mini oculto">
+          {atajos.map((c) => (
+            <button class="btn" data-cat={c.id} aria-pressed="false">
+              {c.icono && <img src={`/img/items/${c.icono}`} alt="" />}{c.nombre}
+            </button>
+          ))}
+        </div>
       </div>
 
       {atajos.map((c) => (
@@ -97,6 +110,9 @@ const atajos = r.atajos ?? [];
         ocultarListas();
         document.querySelectorAll('[data-cat]').forEach((x) => marcar(x, false));
         marcar(b, true);
+        // El popup se cierra al elegir: si queda abierto tapa el primer video.
+        mini?.classList.add('oculto');
+        if (btnAtajo) marcar(btnAtajo, false);
         $(`#lista-${b.dataset.cat}`)?.classList.remove('oculto');
       })
     );

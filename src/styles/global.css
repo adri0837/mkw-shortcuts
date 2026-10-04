@@ -18,15 +18,47 @@ a{color:inherit}
 /* Racers Delight tiene un solo peso (Regular). Si le dejamos font-weight:700 o
    font-style:italic el navegador fabrica un bold y un italic falsos y la
    tipografía queda con sombra. Por eso el agrupado pisa los 400/400 de cada uno. */
-.titulo,.opcion,.btn.cerrar{font-family:"Racers Delight","Trebuchet MS",sans-serif;font-weight:400;font-style:normal}
+.titulo,.opcion,.btn,.volver,.cabecera h1,.titulo-estrategia,.ayuda,.atajo h3{font-family:"Racers Delight","Trebuchet MS",sans-serif;font-weight:400;font-style:normal}
 .titulo{font-size:clamp(2.2rem,7vw,4.2rem);line-height:1.08;margin:2rem 0 1.5rem;text-align:center;color:#000}
 .titulo span{display:block}
 .titulo span+span{font-size:.62em}
-.btn{display:inline-flex;align-items:center;gap:.6rem;padding:.7rem 1.4rem;border-radius:999px;border:2px solid var(--borde);background:var(--panel);color:var(--texto);font:inherit;font-weight:700;cursor:pointer;text-decoration:none}
+/* Las cinco letras de "World" van una por color, como en el logo. Uso <i> y no
+   <span> a propósito: .titulo span{display:block} manda sobre cualquier span
+   anidado y las letras se irían una por línea. El <i> es inline, y .titulo ya
+   anula itálica y negrita, así que solo falta el color. Los cinco pasan 3:1
+   sobre el blanco del degradado, que es lo que pide texto grande. */
+.letra-w{color:#d97706}
+.letra-o{color:#1f4e8c}
+.letra-r{color:#2f9e44}
+.letra-l{color:#e03131}
+/* Contorno solo en "World". Los <i> son las únicas letras del título, así que
+   un selector sobre ellos evita tener que envolver el texto en otro wrapper. 0.06em
+   acompaña al clamp() del tamaño en vez de fijar un px, y paint-order pinta el
+   relleno encima del trazo para que la letra no adelgaze. */
+.titulo i{-webkit-text-stroke:.09em #000;paint-order:stroke fill}
+.letra-d{color:#0891b2}
+/* Sin font:inherit ni font-weight:700: ambos venian DESPUES del grupo de
+   Racers Delight y lo pisaban (font:inherit resetea font-family al valor
+   heredado y el 700 fabricaba una negrita falsa). La familia y el 400 los
+   pone el grupo. */
+.btn{display:inline-flex;align-items:center;gap:.6rem;padding:.7rem 1.4rem;border-radius:999px;border:2px solid var(--borde);background:var(--panel);color:var(--texto);cursor:pointer;text-decoration:none}
 .btn:hover,.btn[aria-pressed=true]{background:var(--acento);color:#1a1a1a;border-color:var(--acento-borde)}
 .oculto{display:none!important}
 .mapa{position:relative;border-radius:var(--r);overflow:hidden}
-.mapa>img{display:block;width:100%;height:auto}
+/* El mapa es un rectángulo opaco (no tiene canal alfa) y los cuatro bordes son
+   el mismo #3D7CB6, azul saturado. Pegado sobre un fondo que termina en #bcd8ef
+   el filo se nota, por más que las esquinas estén redondeadas.
+   La máscara se come justamente ese borde: una capa por eje, y con intersect
+   las dos se cruzan, así la transición queda en los cuatro lados. Al ser
+   uniforme el borde, desvanecerlo no se come contenido.
+   Los pines son hermanos de la img, no se enmascaran: quedan nítidos. */
+.mapa>img{
+  display:block;width:100%;height:auto;
+  -webkit-mask-image:linear-gradient(to right,transparent,#000 11%,#000 89%,transparent),linear-gradient(to bottom,transparent,#000 11%,#000 89%,transparent);
+  -webkit-mask-composite:source-in;
+  mask-image:linear-gradient(to right,transparent,#000 11%,#000 89%,transparent),linear-gradient(to bottom,transparent,#000 11%,#000 89%,transparent);
+  mask-composite:intersect;
+}
 .pin{position:absolute;width:9%;min-width:44px;transform:translate(-50%,-50%);background:none;border:0;padding:0;cursor:pointer;transition:transform .15s}
 .pin:hover{transform:translate(-50%,-50%) scale(1.15)}
 .pin img{width:100%;display:block}
@@ -71,8 +103,12 @@ a.opcion:hover{background:var(--acento);color:#1a1a1a;border-color:var(--acento-
 .opcion[aria-disabled=true]{opacity:.45}
 .cerrar{margin-top:1rem}
 .cabecera{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;margin:1.5rem 0}
-.cabecera img{width:110px}
-.cabecera h1{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;font-size:1.6rem}
+.cabecera img{width:140px}
+/* La copa se queda con la pista: va a la izquierda del nombre, el icono de la
+   pista se corrió a la derecha. Es más chica que el icono para no competir, y
+   mantiene la misma proporción que antes (0.58). */
+.cabecera .copa{width:115px}
+.cabecera h1{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;font-size:2.1rem}
 .cabecera h1 .par{display:flex;align-items:center;gap:.6rem}
 .flecha{font-size:1.8rem;color:var(--suave)}
 .ruta-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:1.5rem;margin:1.5rem 0}
@@ -80,10 +116,43 @@ a.opcion:hover{background:var(--acento);color:#1a1a1a;border-color:var(--acento-
 .ruta-cards .card{width:100%;aspect-ratio:444/317;border-radius:var(--r);display:block}
 .ruta-cards figcaption{margin-top:.5rem;font-weight:700;text-align:center}
 .estrategia{max-width:70ch;color:var(--suave)}
-.acciones{display:flex;gap:.8rem;flex-wrap:wrap;margin:1.5rem 0}
-.mini{display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:1.5rem}
-.ph{display:inline-grid;place-items:center;width:2rem;height:2rem;border-radius:50%;background:rgba(18,32,46,.12);overflow:hidden}
-.ph img{width:100%;height:100%;object-fit:cover}
+/* El "?" abre el glosario de perfiles por hover, no por click. El popup va
+   superpuesto (absolute), asi que no empuja el parrafo de la estrategia.
+   El trigger es solo el circulo, mas el panel para poder entrar a leerlo: el
+   panel arranca en top:100% sin margin, y como el h2 es flex con el boton
+   centrado, el panel queda pegado al borde del circulo. Asi no hay hueco que
+   cruzar al bajar el mouse y el popup no parpadea.
+   :focus-visible cubre el teclado y NO matchea el click, asi que el click no
+   lo abre. */
+.titulo-estrategia{display:flex;align-items:center;gap:.6rem;margin:0}
+.ayuda::before{content:"?"}
+.ayuda{width:1.7rem;height:1.7rem;flex:0 0 auto;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;padding:0;background:#e2e9f0;border:1px solid #b9c6d2;color:var(--suave);cursor:pointer}
+.ayuda:hover{background:#cfdae5;color:var(--texto)}
+.bloque-estrategia:has(.ayuda:is(:hover,:focus-visible)) .roles,
+.bloque-estrategia:has(.roles:hover) .roles{display:block}
+.bloque-estrategia:has(.ayuda:is(:hover,:focus-visible)) .ayuda::before,
+.bloque-estrategia:has(.roles:hover) .ayuda::before{content:"¿"}
+.bloque-estrategia{position:relative;margin:1.6rem 0 .8rem}
+/* Los dos popups (glosario de perfiles y menu de atajos) son el MISMO panel:
+   superpuestos, fondo blanco, borde y sombra. Se definen juntos para que no
+   se desincronicen. */
+.roles,.mini{position:absolute;top:100%;left:0;padding:.5rem;border:2px solid var(--borde);border-radius:var(--r);background:var(--panel);box-shadow:0 10px 28px rgba(18,32,46,.22)}
+/* z-index aparte porque el bloque de Estrategia va ANTES que .acciones en el
+   DOM: con el mismo z-index gana el ultimo, y el de atajos tapaba al del "?". */
+.mini{z-index:5}
+.roles{z-index:9}
+.roles{display:none;max-width:min(70ch,92vw)}
+.roles p{margin:.7rem 0}
+.mini{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.5rem}
+/* El menu de atajos (NISC / Champinon / Pluma) es un popup pegado debajo del
+   boton y no una fila en el flujo: asi no empuja el texto de la estrategia.
+   .acciones es el ancla porque el .mini es su hermano siguiente. */
+.acciones{position:relative;display:flex;gap:.8rem;flex-wrap:wrap;margin:1.5rem 0}
+/* .mini comparte el panel con .roles (ver arriba): superpuesto y con sombra. */
+/* El item va suelto al lado del texto, sin circulo. contain y no cover porque
+   los assets vienen con proporciones distintas (bullet-bill 180x110, mushroom
+   180x178, feather 180x180) y cover le comia casi el 40% del ancho a la bala. */
+.btn img{width:1.6rem;height:1.6rem;object-fit:contain;flex:0 0 auto}
 .atajo{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:1.5rem;padding:1rem 0;border-top:1px solid var(--borde)}
 .clip{aspect-ratio:16/9;width:100%;border-radius:var(--r);background:var(--panel);border:2px dashed var(--borde);display:grid;place-items:center;color:var(--suave)}
 video.clip{border-style:solid;background:#000}

@@ -50,13 +50,35 @@ export type Pista = {
   atajos?: Categoria[];
 };
 
+// Copa de cada pista. Va en un mapa aparte y no repetido en las 30 entradas,
+// así que agregar o corregir una copa es una línea. Los .webp están en
+// public/img/copas/. Esto es solo de las pistas del mapa: las rutas no tienen copa.
+const COPAS: Record<string, string[]> = {
+  champinon: ['mario-bros-circuit', 'crown-city', 'whistlestop-summit', 'dk-spaceport'],
+  flor: ['desert-hills', 'shy-guy-bazaar', 'wario-stadium', 'airship-fortress'],
+  estrella: ['dk-pass', 'starview-peak', 'sky-high-sundae', 'warios-shipyard'],
+  caparazon: ['koopa-troopa-beach', 'faraway-oasis'],
+  banana: ['peach-beach', 'salty-salty-speedway', 'dino-dino-jungle', 'great-block-ruins'],
+  hoja: ['cheep-cheep-falls', 'dandelion-depths', 'boo-cinema', 'dry-bones-burnout'],
+  rayo: ['moo-moo-meadows', 'choco-mountain', 'toads-factory', 'bowsers-castle'],
+  especial: ['acorn-heights', 'mario-circuit', 'peach-stadium', 'rainbow-road'],
+};
+
+const COPA_DE = new Map(Object.entries(COPAS).flatMap(([copa, ids]) => ids.map((id) => [id, copa])));
+
+/** Ruta del .webp de la copa de una pista, o undefined si no tiene. */
+export const copaDe = (id: string) => {
+  const copa = COPA_DE.get(id);
+  return copa ? `/img/copas/${copa}.webp` : undefined;
+};
+
 export const pistas: Pista[] = [
   {
     id: 'acorn-heights',
     nombre: 'Aldea Arbórea',
     posMapa: { x: 50.2, y: 12.0 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -83,7 +105,7 @@ export const pistas: Pista[] = [
     nombre: 'Fortaleza Aérea',
     posMapa: { x: 14.7, y: 31.6 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -110,7 +132,7 @@ export const pistas: Pista[] = [
     nombre: 'Cine Boo',
     posMapa: { x: 63.2, y: 17.9 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -137,7 +159,7 @@ export const pistas: Pista[] = [
     nombre: 'Castillo de Bowser',
     posMapa: { x: 26.9, y: 19.9 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -164,7 +186,7 @@ export const pistas: Pista[] = [
     nombre: 'Cascadas Cheep Cheep',
     posMapa: { x: 62.1, y: 52.2 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -191,7 +213,7 @@ export const pistas: Pista[] = [
     nombre: 'Monte Chocolate',
     posMapa: { x: 38.1, y: 51.4 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -218,7 +240,7 @@ export const pistas: Pista[] = [
     nombre: 'Ciudad Corona',
     posMapa: { x: 37.3, y: 70.4 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -245,7 +267,7 @@ export const pistas: Pista[] = [
     nombre: 'Gruta Diente de León',
     posMapa: { x: 61.8, y: 37.0 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -272,7 +294,7 @@ export const pistas: Pista[] = [
     nombre: 'Desierto Sol-Sol',
     posMapa: { x: 11.9, y: 69.9 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -299,7 +321,7 @@ export const pistas: Pista[] = [
     nombre: 'Jungla Dino Dino',
     posMapa: { x: 64.4, y: 86.7 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -326,7 +348,7 @@ export const pistas: Pista[] = [
     nombre: 'DK Alpino',
     posMapa: { x: 73.5, y: 43.4 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -353,7 +375,7 @@ export const pistas: Pista[] = [
     nombre: 'Puerto Espacial DK',
     posMapa: { x: 38.9, y: 84.5 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -380,7 +402,7 @@ export const pistas: Pista[] = [
     nombre: 'Caverna Ósea',
     posMapa: { x: 37.6, y: 18.1 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -407,7 +429,7 @@ export const pistas: Pista[] = [
     nombre: 'Sabana Salpicante',
     posMapa: { x: 60.6, y: 68.7 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -434,7 +456,7 @@ export const pistas: Pista[] = [
     nombre: 'Templo del Bloque ?',
     posMapa: { x: 77.0, y: 80.7 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -461,7 +483,7 @@ export const pistas: Pista[] = [
     nombre: 'Playa Koopa',
     posMapa: { x: 49.2, y: 80.2 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -519,7 +541,7 @@ export const pistas: Pista[] = [
     nombre: 'Circuito Mario',
     posMapa: { x: 50.4, y: 27.9 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -546,7 +568,7 @@ export const pistas: Pista[] = [
     nombre: 'Pradera Mu-Mu',
     posMapa: { x: 50.0, y: 42.3 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -573,7 +595,7 @@ export const pistas: Pista[] = [
     nombre: 'Playa Peach',
     posMapa: { x: 85.2, y: 69.6 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -600,7 +622,7 @@ export const pistas: Pista[] = [
     nombre: 'Estadio Peach',
     posMapa: { x: 50.1, y: 58.2 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -627,7 +649,7 @@ export const pistas: Pista[] = [
     nombre: 'Senda Arco Iris',
     posMapa: { x: 49.9, y: 71.1 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -654,7 +676,7 @@ export const pistas: Pista[] = [
     nombre: 'Ciudad Salina',
     posMapa: { x: 74.3, y: 60.7 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -681,7 +703,7 @@ export const pistas: Pista[] = [
     nombre: 'Bazar Shy Guy',
     posMapa: { x: 12.7, y: 49.3 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -708,7 +730,7 @@ export const pistas: Pista[] = [
     nombre: 'Cielos Helados',
     posMapa: { x: 84.7, y: 35.3 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -735,7 +757,7 @@ export const pistas: Pista[] = [
     nombre: 'Mirador Estelar',
     posMapa: { x: 73.8, y: 24.9 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -762,7 +784,7 @@ export const pistas: Pista[] = [
     nombre: 'Fábrica de Toad',
     posMapa: { x: 39.2, y: 35.3 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -789,7 +811,7 @@ export const pistas: Pista[] = [
     nombre: 'Estadio Wario',
     posMapa: { x: 26.3, y: 42.9 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -816,7 +838,7 @@ export const pistas: Pista[] = [
     nombre: 'Galeón de Wario',
     posMapa: { x: 85.3, y: 54.1 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -843,7 +865,7 @@ export const pistas: Pista[] = [
     nombre: 'Cañón Ferroviario',
     posMapa: { x: 24.5, y: 79.3 },
     posBala: { x: 50, y: 50 },
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
         id: 'nisc',
@@ -908,7 +930,7 @@ export const rutas: Ruta[] = [
     desde: 'mario-bros-circuit',
     hasta: 'crown-city',
     rutasPendientes: 6,
-    estrategia: '',
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [],
   },
 ];
