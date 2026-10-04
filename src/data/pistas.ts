@@ -885,3 +885,45 @@ for (const p of pistas) {
     if (!existsSync(ruta)) throw new Error(`Falta la imagen: public/img/pistas/${p.id}/${archivo}`);
   }
 }
+
+// Una ruta une dos pistas del mapa. Reusa Categoria/Atajo tal cual, así que los
+// atajos de una ruta se escriben exactamente igual que los de una pista.
+export type Ruta = {
+  id: string;
+  desde: string; // id de pista
+  hasta: string; // id de pista
+  // Cuántas rutas del juego todavía no están escritas para este par. Cada una
+  // ocupa una fila del menú con el texto de "próximamente". Es opcional a
+  // propósito: solo se pone en las pistas cuyo número de rutas está confirmado
+  // mirando el juego, no en todas. Mario Bros. Circuit tiene 8 rutas en total
+  // (la pista, la que va a Ciudad Corona y estas 6), ya verificado.
+  rutasPendientes?: number;
+  estrategia?: string;
+  atajos?: Categoria[];
+};
+
+export const rutas: Ruta[] = [
+  {
+    id: 'mario-bros-circuit-a-crown-city',
+    desde: 'mario-bros-circuit',
+    hasta: 'crown-city',
+    rutasPendientes: 6,
+    estrategia: '',
+    atajos: [],
+  },
+];
+
+// Igual que con las imágenes: un id de pista mal escrito en una ruta se vería
+// como una página medio vacía sin explicar por qué. Se frena la build.
+const pistasPorId = new Set(pistas.map((p) => p.id));
+for (const r of rutas) {
+  for (const [extremo, id] of [
+    ['desde', r.desde],
+    ['hasta', r.hasta],
+  ] as const) {
+    if (!pistasPorId.has(id)) throw new Error(`La ruta ${r.id} apunta a una pista inexistente en ${extremo}: ${id}`);
+  }
+}
+
+/** La ruta que sale de una pista, si hay. El menú la usa para saber si enlazar. */
+export const rutaDesde = (pistaId: string) => rutas.find((r) => r.desde === pistaId);

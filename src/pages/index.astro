@@ -1,15 +1,33 @@
 ---
 import Base from '../layouts/Base.astro';
-import { enElMapa, imgDe } from '../data/pistas';
+import { enElMapa, imgDe, rutaDesde, pistas } from '../data/pistas';
 
 // Lo único que el menú necesita saber de cada pista. Va en el HTML como un
 // bloque de datos plano, y el script del final lo lee al hacer clic.
+// `ruta` ya viene resuelto como href y `rutaHasta` como el texto del botón.
+// Quedan vacíos si esa pista todavía no tiene ruta declarada.
 const paraMenu = Object.fromEntries(
-  enElMapa().map((p) => [p.id, { nombre: p.nombre, card: imgDe(p, 'card') }])
+  enElMapa().map((p) => {
+    const r = rutaDesde(p.id);
+    const hasta = r ? pistas.find((x) => x.id === r.hasta)! : undefined;
+    return [
+      p.id,
+      {
+        nombre: p.nombre,
+        card: imgDe(p, 'card'),
+        ruta: r ? `/ruta/${r.id}` : '',
+        rutaHasta: hasta?.nombre ?? '',
+        // Con la opción de ruta encima, el card pasa a ser la composición
+        // A → B en vez de la card sola.
+        rutaCards: hasta ? [imgDe(p, 'card'), '/img/going-to.png', imgDe(hasta, 'card')] : [],
+        rutasPendientes: r?.rutasPendientes ?? 0,
+      },
+    ];
+  })
 );
 ---
 <Base>
-  <h1 class="titulo">MKW Shortcuts and strategies</h1>
+  <h1 class="titulo"><span>Mario Kart World</span><span>Atajos y Estrategias</span></h1>
 
   <!-- MAPA: cada pista es un pin. Ajustá la posición con posMapa {x,y} (%) en src/data/pistas.ts -->
   <div class="mapa">
@@ -27,46 +45,91 @@ const paraMenu = Object.fromEntries(
        pistas entran acá cuando estén. -->
   <dialog id="menu" aria-label="Elegir pista">
     <div class="menu">
-      <img id="card" alt="" />
+      <div id="cards" class="cards"></div>
       <ul id="opciones"></ul>
     </div>
     <button class="btn cerrar" type="button">Cerrar</button>
   </dialog>
 
   <script>
-    const datos: Record<string, { nombre: string; card: string }> =
-      JSON.parse(document.getElementById('datos')!.textContent!);
+    const datos: Record<
+      string,
+      {
+        nombre: string;
+        card: string;
+        ruta: string;
+        rutaHasta: string;
+        rutaCards: string[];
+        rutasPendientes: number;
+      }
+    > = JSON.parse(document.getElementById('datos')!.textContent!);
     const dlg = document.getElementById('menu') as HTMLDialogElement;
-    const card = dlg.querySelector<HTMLImageElement>('#card')!;
+    const cards = document.getElementById('cards')!;
     const lista = dlg.querySelector('ul')!;
 
-    const opcion = (texto: string, href?: string) => {
+    // `n` imágenes de la fila actual: 1 = la card de la pista, 3 = A → flecha → B.
+    // `going` marca la del medio para que el CSS no le imponga el recorte 444x317.
+    const pintarCards = (urls: string[], alt: string) => {
+      cards.dataset.n = String(urls.length);
+      cards.replaceChildren(
+        ...urls.map((u) => {
+          const img = document.createElement('img');
+          img.src = u;
+          img.alt = alt;
+          if (urls.length === 3 && u === urls[1]) img.className = 'going';
+          return img;
+        })
+      );
+    };
+
+    const opcion = (
+      texto: string,
+      href?: string,
+      cardsDeEsta: string[] = [],
+      prefijo = ''
+    ) => {
       const li = document.createElement('li');
-      if (href) {
-        const a = document.createElement('a');
-        a.className = 'opcion';
-        a.href = href;
-        a.textContent = texto;
-        li.append(a);
-      } else {
-        const span = document.createElement('span');
-        span.className = 'opcion';
-        span.setAttribute('aria-disabled', 'true');
-        span.textContent = texto;
-        li.append(span);
+      const el = document.createElement(href ? 'a' : 'span');
+      el.className = 'opcion';
+      if (href) (el as HTMLAnchorElement).href = href;
+      else el.setAttribute('aria-disabled', 'true');
+      if (prefijo) {
+        const p = document.createElement('span');
+        p.className = 'prefijo';
+        p.textContent = prefijo;
+        el.append(p);
       }
+      el.append(document.createTextNode(texto));
+      // mouseenter y focus: el teclado tiene que ver el mismo cambio que el mouse.
+      // Sin cards no hay nada que pintar. Sin este guard un placeholder borra la
+      // card de arriba: data-n=0 no tiene regla y el area se colapsa.
+      if (cardsDeEsta.length) {
+        el.addEventListener('mouseenter', () => pintarCards(cardsDeEsta, texto));
+        el.addEventListener('focus', () => pintarCards(cardsDeEsta, texto));
+      }
+      li.append(el);
       lista.append(li);
     };
 
+    // Un solo lugar para el texto de "todavía no está": si las pistas que no tienen
+    // ruta y las rutas pendientes usaran dos strings distintos, el menú dejaría
+    // de ser uniforme.
+    const SIN_RUTA = 'Ruta hacia otra pista, próximamente';
+
     const abrir = (id: string) => {
       const t = datos[id];
-      // Sin esto se ve la card de la pista anterior hasta que carga la nueva.
-      card.removeAttribute('src');
-      card.src = t.card;
-      card.alt = t.nombre;
+      pintarCards([t.card], t.nombre);
       lista.replaceChildren();
-      opcion(t.nombre, `/pistas/${id}`);
-      opcion('Ruta hacia otra pista (próximamente)');
+      opcion(t.nombre, `/pistas/${id}`, [t.card]);
+      if (t.ruta) {
+        opcion(t.rutaHasta, t.ruta, t.rutaCards, '>>> ');
+      } else {
+        // Sin ruta declarada no hay nada que enlazar: sigue siendo la opción muerta.
+        opcion(SIN_RUTA);
+      }
+      // Solo se agrega fila para las rutas cuya cantidad está confirmada en los
+      // datos. Las pistas sin ese dato no se inventan filas.
+      for (let i = 0; i < t.rutasPendientes; i++) opcion(SIN_RUTA);
       dlg.showModal();
     };
 

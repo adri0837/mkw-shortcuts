@@ -1,0 +1,104 @@
+---
+import Base from '../../layouts/Base.astro';
+import { pistas, rutas, imgDe, CLIPS_BASE } from '../../data/pistas';
+
+export function getStaticPaths() {
+  return rutas.map((r) => ({ params: { id: r.id }, props: { r } }));
+}
+
+const { r } = Astro.props;
+const desde = pistas.find((p) => p.id === r.desde)!;
+const hasta = pistas.find((p) => p.id === r.hasta)!;
+const atajos = r.atajos ?? [];
+---
+<Base>
+  <a href="/">← Volver al mapa</a>
+
+  <!-- DE DÓNDE A DÓNDE: las dos pistas de la ruta, con sus cards. -->
+  <header class="cabecera">
+    <h1>
+      <span class="par"><img src={imgDe(desde, 'icono')} alt="" />{desde.nombre}</span>
+      <span class="flecha" aria-hidden="true">→</span>
+      <span class="par"><img src={imgDe(hasta, 'icono')} alt="" />{hasta.nombre}</span>
+    </h1>
+  </header>
+
+  <div class="ruta-cards">
+    <figure>
+      <img class="card" src={imgDe(desde, 'card')} alt={`Card de ${desde.nombre}`} />
+      <figcaption>{desde.nombre}</figcaption>
+    </figure>
+    <figure>
+      <img class="card" src={imgDe(hasta, 'card')} alt={`Card de ${hasta.nombre}`} />
+      <figcaption>{hasta.nombre}</figcaption>
+    </figure>
+  </div>
+
+  {r.estrategia && (
+    <>
+      <h2>Estrategia</h2>
+      <p class="estrategia">{r.estrategia}</p>
+    </>
+  )}
+
+  {atajos.length > 0 && (
+    <>
+      <div class="acciones">
+        <button class="btn" id="btn-atajo" aria-pressed="false">Atajos de la ruta</button>
+      </div>
+
+      <div id="mini" class="mini oculto">
+        {atajos.map((c) => (
+          <button class="btn" data-cat={c.id} aria-pressed="false">
+            {c.icono && <span class="ph"><img src={`/img/items/${c.icono}`} alt="" /></span>}{c.nombre}
+          </button>
+        ))}
+      </div>
+
+      {atajos.map((c) => (
+        <section class="lista oculto" id={`lista-${c.id}`}>
+          {c.atajos.map((a) => (
+            <article class="atajo">
+              {a.clip
+                ? <video
+                    class="clip"
+                    src={`${CLIPS_BASE}/${a.clip}`}
+                    poster={`${CLIPS_BASE}/${a.clip.replace(/\.mp4$/, '.jpg')}`}
+                    controls
+                    preload="metadata"
+                  ></video>
+                : <div class="clip">Clip pendiente</div>}
+              <div>
+                <h3>{a.titulo}</h3>
+                <p>{a.descripcion}</p>
+              </div>
+            </article>
+          ))}
+        </section>
+      ))}
+    </>
+  )}
+
+  <script>
+    const $ = (s: string) => document.querySelector<HTMLElement>(s);
+    const btnAtajo = $('#btn-atajo');
+    const mini = $('#mini');
+    const ocultarListas = () => document.querySelectorAll('.lista').forEach((l) => l.classList.add('oculto'));
+    const marcar = (el: Element, on: boolean) => el.setAttribute('aria-pressed', String(on));
+
+    btnAtajo?.addEventListener('click', () => {
+      mini?.classList.toggle('oculto');
+      const abierto = mini !== null && mini?.classList.contains('oculto') === false;
+      if (btnAtajo) marcar(btnAtajo, abierto);
+      if (!abierto) ocultarListas();
+    });
+    document.querySelectorAll<HTMLElement>('[data-cat]').forEach((b) =>
+      b.addEventListener('click', () => {
+        ocultarListas();
+        document.querySelectorAll('[data-cat]').forEach((x) => marcar(x, false));
+        marcar(b, true);
+        $(`#lista-${b.dataset.cat}`)?.classList.remove('oculto');
+      })
+    );
+  </script>
+</Base>

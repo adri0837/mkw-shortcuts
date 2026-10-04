@@ -1,36 +1,88 @@
-:root{--fondo:#12202e;--panel:#1c3248;--borde:#3b5a78;--texto:#f3f0e6;--suave:#a9bccd;--acento:#ffcf33;--r:14px}
+/* La fuente del sistema no la ven los visitantes, así que va servida desde el
+   sitio. Solo tiene un peso (Regular) y le falta el ':'. */
+@font-face{font-family:"Racers Delight";src:url("/fonts/RacersDelight.woff2") format("woff2");font-weight:400;font-style:normal;font-display:block}
+
+:root{--panel:#fff;--borde:#c3d4e3;--texto:#12202e;--suave:#4a6379;--acento:#ffcf33;--acento-borde:#c99700;--r:14px;--mar:#367cbd;--opcion-alto:3.4rem}
 *{box-sizing:border-box}
-body{margin:0;background:var(--fondo);color:var(--texto);font-family:"Trebuchet MS","Segoe UI",sans-serif;line-height:1.55}
+html{color-scheme:light}
+/* showModal() no bloquea el scroll del documento: el fondo se sigue moviendo
+   con la rueda. */
+html:has(dialog[open]){overflow:hidden}
+/* Blanco arriba, mar abajo. El azul final es el mismo del mapa, aclarado para
+   que el texto siga teniendo contraste. */
+body{margin:0;min-height:100vh;background:linear-gradient(180deg,#fff 0%,#f2f7fb 40%,#dceaf7 70%,#bcd8ef 100%);color:var(--texto);font-family:"Trebuchet MS","Segoe UI",sans-serif;line-height:1.55}
 h1,h2,h3{font-family:"Arial Black","Segoe UI",sans-serif;font-style:italic;letter-spacing:-.01em;margin:0}
 a{color:inherit}
 :focus-visible{outline:3px solid var(--acento);outline-offset:3px}
 .wrap{max-width:1100px;margin:0 auto;padding:1.5rem 1rem 4rem}
-.titulo{font-size:clamp(2rem,6vw,3.6rem);margin:2rem 0 1.5rem}
+/* Racers Delight tiene un solo peso (Regular). Si le dejamos font-weight:700 o
+   font-style:italic el navegador fabrica un bold y un italic falsos y la
+   tipografía queda con sombra. Por eso el agrupado pisa los 400/400 de cada uno. */
+.titulo,.opcion,.btn.cerrar{font-family:"Racers Delight","Trebuchet MS",sans-serif;font-weight:400;font-style:normal}
+.titulo{font-size:clamp(2.2rem,7vw,4.2rem);line-height:1.08;margin:2rem 0 1.5rem;text-align:center;color:#000}
+.titulo span{display:block}
+.titulo span+span{font-size:.62em}
 .btn{display:inline-flex;align-items:center;gap:.6rem;padding:.7rem 1.4rem;border-radius:999px;border:2px solid var(--borde);background:var(--panel);color:var(--texto);font:inherit;font-weight:700;cursor:pointer;text-decoration:none}
-.btn:hover,.btn[aria-pressed=true]{background:var(--acento);color:#1a1a1a;border-color:var(--acento)}
+.btn:hover,.btn[aria-pressed=true]{background:var(--acento);color:#1a1a1a;border-color:var(--acento-borde)}
 .oculto{display:none!important}
 .mapa{position:relative;border-radius:var(--r);overflow:hidden}
 .mapa>img{display:block;width:100%;height:auto}
 .pin{position:absolute;width:9%;min-width:44px;transform:translate(-50%,-50%);background:none;border:0;padding:0;cursor:pointer;transition:transform .15s}
 .pin:hover{transform:translate(-50%,-50%) scale(1.15)}
 .pin img{width:100%;display:block}
-dialog#menu{border:0;background:none;padding:1rem;color:var(--texto);max-width:880px}
+/* El width explicito es lo que evita el parpadeo: un dialog sin width es
+   shrink-to-fit, asi que se agranda solo cuando el contenido es mas ancho
+   (1 card = 476px, 3 imagenes = 880px) y eso mueve las opciones de abajo. */
+dialog#menu{border:0;background:none;padding:1rem;color:var(--texto);width:min(760px,94vw);max-height:90vh;overflow:auto}
 dialog#menu::backdrop{background:rgba(10,20,30,.78);backdrop-filter:blur(6px)}
-.menu{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:1.5rem;align-items:center;max-width:860px;width:100%}
+.menu{display:grid;grid-template-columns:minmax(0,1fr);gap:1.2rem;width:100%}
 /* Todas las cards miden 444x317. Fijar la proporción evita que el alto salte
-   mientras carga la imagen. */
-.menu .card{width:100%;aspect-ratio:444/317;border-radius:var(--r)}
-.menu ul{list-style:none;margin:0;padding:0;display:grid;gap:.6rem}
-.opcion{display:block;padding:.8rem 1.2rem;border-radius:999px;background:var(--panel);border:2px solid var(--borde);font-weight:700;font-style:italic;text-decoration:none}
-a.opcion:hover{background:var(--acento);color:#1a1a1a;border-color:var(--acento)}
+   mientras carga la imagen. El `data-n` lo pone el script: 1 = una sola card,
+   3 = card A + flecha + card B cuando la opción es una ruta. */
+/* Alto DEFINITIVO e independiente de cuantas imagenes haya: eso es lo que deja
+   las opciones clavadas al hacer hover, que era el problema. Sin un alto fijo el
+   area crecia con 1 card y se encogia con 3, moviendo las opciones de abajo.
+   grid-template-rows:100% es imprescindible: sin el, la fila se dimensiona por
+   contenido, height:100% no resuelve contra la caja y la card desborda encima
+   de las opciones. contain y no cover: antes que recortar la card, sobra aire. */
+.cards{display:grid;gap:.5rem;align-content:center;grid-template-rows:100%;height:min(38vw,260px)}
+/* La caja se angosta en estado 1 para que no quede tanto aire alrededor de la
+   card. Es seguro porque el lock depende solo del alto, no del ancho. */
+.cards[data-n="1"]{grid-template-columns:minmax(0,1fr);max-width:400px;margin-inline:auto}
+.cards[data-n="3"]{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center}
+.cards img{height:100%;width:100%;object-fit:contain;border-radius:var(--r);display:block;animation:cardEntra .24s ease-out both}
+/* El script reemplaza los <img> con otros nuevos, así que la animación sola se
+   reinicia en cada cambio: no hay que forzar el reflow a mano. */
+@keyframes cardEntra{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:none}}
+.cards img.going{height:auto;width:auto;max-width:min(130px,22vw)}
+/* La columna implícita de un grid es `auto`, o sea se estira al texto más
+   largo y las opciones se salen de su columna encima de la card. */
+/* 6 opciones visibles: 6 filas de --opcion-alto + los 5 gaps que las separan.
+   La cuenta usa la misma variable que fija el alto de cada fila, asi que si se
+   cambia una se adjusta la otra. Con menos de 6 no hay scroll (max-height, no
+   height) y la lista no deja una caja vacia. */
+.menu ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:.6rem;max-height:calc(6 * var(--opcion-alto) + 5 * .6rem);overflow-y:auto;scrollbar-width:thin;overscroll-behavior:contain}
+.menu>*{min-width:0}
+.opcion{display:flex;align-items:center;min-height:var(--opcion-alto);padding:0 1.2rem;border-radius:999px;background:var(--panel);border:2px solid var(--borde);text-decoration:none}
+a.opcion:hover{background:var(--acento);color:#1a1a1a;border-color:var(--acento-borde)}
+/* '>>>' no existe en Racers Delight (no tiene > < ni »), así que ese prefijo
+   cae a la fuente de respaldo a propósito, no por accidente. */
+.prefijo{font-family:"Trebuchet MS","Segoe UI",sans-serif}
 .opcion[aria-disabled=true]{opacity:.45}
 .cerrar{margin-top:1rem}
 .cabecera{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;margin:1.5rem 0}
 .cabecera img{width:110px}
+.cabecera h1{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;font-size:1.6rem}
+.cabecera h1 .par{display:flex;align-items:center;gap:.6rem}
+.flecha{font-size:1.8rem;color:var(--suave)}
+.ruta-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:1.5rem;margin:1.5rem 0}
+.ruta-cards figure{margin:0}
+.ruta-cards .card{width:100%;aspect-ratio:444/317;border-radius:var(--r);display:block}
+.ruta-cards figcaption{margin-top:.5rem;font-weight:700;text-align:center}
 .estrategia{max-width:70ch;color:var(--suave)}
 .acciones{display:flex;gap:.8rem;flex-wrap:wrap;margin:1.5rem 0}
 .mini{display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:1.5rem}
-.ph{display:inline-grid;place-items:center;width:2rem;height:2rem;border-radius:50%;background:rgba(255,255,255,.15);overflow:hidden}
+.ph{display:inline-grid;place-items:center;width:2rem;height:2rem;border-radius:50%;background:rgba(18,32,46,.12);overflow:hidden}
 .ph img{width:100%;height:100%;object-fit:cover}
 .atajo{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:1.5rem;padding:1rem 0;border-top:1px solid var(--borde)}
 .clip{aspect-ratio:16/9;width:100%;border-radius:var(--r);background:var(--panel);border:2px dashed var(--borde);display:grid;place-items:center;color:var(--suave)}
@@ -40,4 +92,4 @@ video.clip{border-style:solid;background:#000}
 .bala{position:absolute;width:2rem;height:2rem;transform:translate(-50%,-50%);display:grid;place-items:center;background:#1a1a1a;border-radius:50%;overflow:hidden}
 .bala img{width:100%;height:100%;object-fit:contain}
 @media(max-width:700px){.menu,.atajo{grid-template-columns:1fr}}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
