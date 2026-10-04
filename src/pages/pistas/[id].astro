@@ -1,52 +1,63 @@
 ---
 import Base from '../../layouts/Base.astro';
-import tracks from '../../data/tracks.json';
+import { pistas, imgDe, CLIPS_BASE } from '../../data/pistas';
 export function getStaticPaths() {
-  return tracks.map((t) => ({ params: { id: t.id }, props: { t } }));
+  return pistas.map((p) => ({ params: { id: p.id }, props: { p } }));
 }
-const { t } = Astro.props;
-// TODO: reemplazar los emojis por imágenes (ej. /img/items/champinon.png, pluma.png, bala.png)
-const categorias = [
-  { key: 'nisc', texto: 'NISC', icono: null },
-  { key: 'champinon', texto: 'Champiñón', icono: '🍄' },
-  { key: 'pluma', texto: 'Pluma', icono: '🪶' },
-] as const;
+const { p } = Astro.props;
+const atajos = p.atajos ?? [];
+const hayBala = p.posBala !== undefined;
 ---
-<Base titulo={`${t.nombre} · MKW Shortcuts and strategies`}>
+<Base>
   <a href="/">← Volver al mapa</a>
 
   <header class="cabecera">
-    <img src={t.icono} alt="" />
-    <h1>{t.nombre}</h1>
+    <img src={imgDe(p, 'icono')} alt="" />
+    <h1>{p.nombre}</h1>
   </header>
 
-  <h2>Estrategia</h2>
-  <p class="estrategia">{t.estrategia}</p>
+  {p.estrategia && (
+    <>
+      <h2>Estrategia</h2>
+      <p class="estrategia">{p.estrategia}</p>
+    </>
+  )}
 
-  <div class="acciones">
-    <button class="btn" id="btn-atajo" aria-pressed="false">Atajo</button>
-    <!-- TODO: reemplazar 🚀 por la imagen del ítem Bala -->
-    <button class="btn" id="btn-bala" aria-pressed="false"><span class="ph">🚀</span> Bala</button>
-  </div>
+  {(atajos.length > 0 || hayBala) && (
+    <div class="acciones">
+      {atajos.length > 0 && <button class="btn" id="btn-atajo" aria-pressed="false">Atajo</button>}
+      {hayBala && (
+        <button class="btn" id="btn-bala" aria-pressed="false">
+          <span class="ph"><img src="/img/items/bullet-bill.webp" alt="" /></span>Bala
+        </button>
+      )}
+    </div>
+  )}
 
-  <!-- MINI MENÚ DE ATAJOS -->
-  <div id="mini" class="mini oculto">
-    {categorias.map((c) => (
-      <button class="btn" data-cat={c.key} aria-pressed="false">
-        {c.icono && <span class="ph">{c.icono}</span>}{c.texto}
-      </button>
-    ))}
-  </div>
+  <!-- MINI MENÚ DE ATAJOS: los botones salen de atajos[] en src/data/pistas.ts -->
+  {atajos.length > 0 && (
+    <div id="mini" class="mini oculto">
+      {atajos.map((c) => (
+        <button class="btn" data-cat={c.id} aria-pressed="false">
+          {c.icono && <span class="ph"><img src={`/img/items/${c.icono}`} alt="" /></span>}{c.nombre}
+        </button>
+      ))}
+    </div>
+  )}
 
   <!-- LISTAS DE ATAJOS: clip a la izquierda, descripción a la derecha -->
-  {categorias.map((c) => (
-    <section class="lista oculto" id={`lista-${c.key}`}>
-      {t.atajos[c.key].map((a) => (
+  {atajos.map((c) => (
+    <section class="lista oculto" id={`lista-${c.id}`}>
+      {c.atajos.map((a) => (
         <article class="atajo">
-          {/* Para añadir un clip: pon la ruta/URL del .mp4 en "clip" dentro de tracks.json
-              (ej. "/img/clips/mi-clip.mp4" o la URL pública de R2) */}
           {a.clip
-            ? <video class="clip" src={a.clip} controls preload="none"></video>
+            ? <video
+              class="clip"
+              src={`${CLIPS_BASE}/${a.clip}`}
+              poster={`${CLIPS_BASE}/${a.clip.replace(/\.mp4$/, '.jpg')}`}
+              controls
+              preload="metadata"
+            ></video>
             : <div class="clip">Clip pendiente</div>}
           <div>
             <h3>{a.titulo}</h3>
@@ -57,37 +68,43 @@ const categorias = [
     </section>
   ))}
 
-  <!-- MINIMAPA CON LA BALA: ajusta posBala {x,y} (%) en tracks.json -->
-  <section id="panel-bala" class="oculto">
-    <div class="minimapa">
-      <img src={t.minimapa} alt={`Minimapa de ${t.nombre}`} />
-      <span class="bala" style={`left:${t.posBala.x}%;top:${t.posBala.y}%`}>🚀</span>
-    </div>
-  </section>
+  <!-- MINIMAPA CON LA BALA: ajustá posBala {x,y} (%) en src/data/pistas.ts -->
+  {hayBala && (
+    <section id="panel-bala" class="oculto">
+      <div class="minimapa">
+        <img src={imgDe(p, 'minimapa')} alt={`Minimapa de ${p.nombre}`} />
+        <span class="bala" style={`left:${p.posBala!.x}%;top:${p.posBala!.y}%`}>
+          <img src="/img/items/bullet-bill.webp" alt="" />
+        </span>
+      </div>
+    </section>
+  )}
 
   <script>
-    const $ = (s: string) => document.querySelector<HTMLElement>(s)!;
-    const btnAtajo = $('#btn-atajo'), btnBala = $('#btn-bala'), mini = $('#mini'), bala = $('#panel-bala');
+    const $ = (s: string) => document.querySelector<HTMLElement>(s);
+    const btnAtajo = $('#btn-atajo'), btnBala = $('#btn-bala');
+    const mini = $('#mini'), bala = $('#panel-bala');
     const ocultarListas = () => document.querySelectorAll('.lista').forEach((l) => l.classList.add('oculto'));
     const marcar = (el: Element, on: boolean) => el.setAttribute('aria-pressed', String(on));
 
-    btnAtajo.addEventListener('click', () => {
-      mini.classList.toggle('oculto');
-      bala.classList.add('oculto'); marcar(btnBala, false);
-      const abierto = !mini.classList.contains('oculto');
-      marcar(btnAtajo, abierto);
+    btnAtajo?.addEventListener('click', () => {
+      mini?.classList.toggle('oculto');
+      bala?.classList.add('oculto');
+      if (btnBala) marcar(btnBala, false);
+      const abierto = !mini?.classList.contains('oculto');
+      if (btnAtajo) marcar(btnAtajo, abierto);
       if (!abierto) ocultarListas();
     });
-    btnBala.addEventListener('click', () => {
-      const abrir = bala.classList.toggle('oculto') === false;
-      marcar(btnBala, abrir);
-      if (abrir) { mini.classList.add('oculto'); ocultarListas(); marcar(btnAtajo, false); }
+    btnBala?.addEventListener('click', () => {
+      const abierto = bala?.classList.toggle('oculto') === false;
+      marcar(btnBala, abierto);
+      if (abierto) { mini?.classList.add('oculto'); ocultarListas(); if (btnAtajo) marcar(btnAtajo, false); }
     });
     document.querySelectorAll<HTMLElement>('[data-cat]').forEach((b) => b.addEventListener('click', () => {
       ocultarListas();
       document.querySelectorAll('[data-cat]').forEach((x) => marcar(x, false));
       marcar(b, true);
-      $(`#lista-${b.dataset.cat}`).classList.remove('oculto');
+      $(`#lista-${b.dataset.cat}`)?.classList.remove('oculto');
     }));
   </script>
 </Base>

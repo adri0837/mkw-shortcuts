@@ -13,13 +13,20 @@
 // Las imágenes no se nombran: se sacan solas de public/img/pistas/<id>/ con los
 // nombres icono, card y minimapa.
 // Íconos de ítems: public/img/items/{mushroom,feather,bullet-bill}.webp
-// Clips: guardalos en public/img/clips/ y apuntá a "/img/clips/nombre.mp4"
+// Clips: subilos a R2 con `node scripts/subir-clips.mjs "grabacion.mov=nombre.mp4"`
+// y poné acá SOLO el nombre del archivo. El prefijo lo agrega CLIPS_BASE al renderizar,
+// así si algún día cambiás de dominio editás un solo lugar.
 
 import { existsSync } from 'node:fs';
 
+// ponytail: sin fallback real. Si PUBLIC_CLIPS_URL falta, las URL quedan rotas y se ven
+// al instante en devtools; poner un default silencioso esconderia el error.
+export const CLIPS_BASE =
+  import.meta.env.PUBLIC_CLIPS_URL || 'https://REEMPLAZAR-POR-TU-URL-PUBLICA.r2.dev/mkw-shortcuts-project';
+
 export type Atajo = {
   titulo: string;
-  clip: string; // ruta del video, ej. "/img/clips/mario-bros-atajo-1.mp4" ("" = sin clip)
+  clip: string; // nombre del .mp4 en R2, ej. "mario-bros-circuit-nisc-1.mp4" ("" = sin clip)
   descripcion: string;
 };
 
@@ -489,7 +496,7 @@ export const pistas: Pista[] = [
         nombre: 'NISC',
         icono: '',
         atajos: [
-          { titulo: 'Atajo NISC 1', clip: '', descripcion: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+          { titulo: 'Atajo NISC 1', clip: 'mario-bros-circuit-nisc-1.mp4', descripcion: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
           { titulo: 'Atajo NISC 2', clip: '', descripcion: 'Sed do eiusmod tempor incididunt ut labore et dolore.' },
         ],
       },

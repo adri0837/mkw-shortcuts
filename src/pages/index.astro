@@ -1,43 +1,80 @@
 ---
 import Base from '../layouts/Base.astro';
-import tracks from '../data/tracks.json';
+import { enElMapa, imgDe } from '../data/pistas';
+
+// Lo único que el menú necesita saber de cada pista. Va en el HTML como un
+// bloque de datos plano, y el script del final lo lee al hacer clic.
+const paraMenu = Object.fromEntries(
+  enElMapa().map((p) => [p.id, { nombre: p.nombre, card: imgDe(p, 'card') }])
+);
 ---
 <Base>
   <h1 class="titulo">MKW Shortcuts and strategies</h1>
 
-  <!-- MAPA: cada pista es un pin. Ajusta la posición con posMapa {x,y} (%) en src/data/tracks.json -->
+  <!-- MAPA: cada pista es un pin. Ajustá la posición con posMapa {x,y} (%) en src/data/pistas.ts -->
   <div class="mapa">
     <img src="/img/mapa-mundo.webp" alt="Mapa de Mario Kart World" />
-    {tracks.map((t) => (
-      <button class="pin" data-pista={t.id} style={`left:${t.posMapa.x}%;top:${t.posMapa.y}%`} aria-label={t.nombre}>
-        <img src={t.icono} alt="" />
+    {enElMapa().map((p) => (
+      <button class="pin" data-pista={p.id} style={`left:${p.posMapa!.x}%;top:${p.posMapa!.y}%`} aria-label={p.nombre}>
+        <img src={imgDe(p, 'icono')} alt="" />
       </button>
     ))}
   </div>
 
-  <!-- MENÚ DE PISTA (se abre al hacer clic en un pin) -->
-  {tracks.map((t) => (
-    <div class="overlay oculto" id={`menu-${t.id}`} role="dialog" aria-label={t.nombre}>
-      <div>
-        <div class="menu">
-          <img class="card" src={t.card} alt={t.nombre} />
-          <ul>
-            <li><a class="opcion" href={`/pistas/${t.id}`}>{t.nombre}</a></li>
-            <!-- TODO: rutas A → B. Agregar aquí las conexiones hacia otras pistas -->
-            <li><span class="opcion" aria-disabled="true">Ruta hacia otra pista (próximamente)</span></li>
-          </ul>
-        </div>
-        <button class="btn cerrar" data-cerrar>Cerrar</button>
-      </div>
+  <script type="application/json" id="datos" is:inline set:html={JSON.stringify(paraMenu)} />
+
+  <!-- MENÚ DE PISTA: un solo diálogo para las 30 pistas. Las rutas hacia otras
+       pistas entran acá cuando estén. -->
+  <dialog id="menu" aria-label="Elegir pista">
+    <div class="menu">
+      <img id="card" alt="" />
+      <ul id="opciones"></ul>
     </div>
-  ))}
+    <button class="btn cerrar" type="button">Cerrar</button>
+  </dialog>
 
   <script>
-    const abrir = (id: string) => document.getElementById(`menu-${id}`)?.classList.remove('oculto');
-    const cerrar = () => document.querySelectorAll('.overlay').forEach((o) => o.classList.add('oculto'));
-    document.querySelectorAll<HTMLElement>('.pin').forEach((p) => p.addEventListener('click', () => abrir(p.dataset.pista!)));
-    document.querySelectorAll('[data-cerrar]').forEach((b) => b.addEventListener('click', cerrar));
-    document.querySelectorAll('.overlay').forEach((o) => o.addEventListener('click', (e) => { if (e.target === o) cerrar(); }));
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') cerrar(); });
+    const datos: Record<string, { nombre: string; card: string }> =
+      JSON.parse(document.getElementById('datos')!.textContent!);
+    const dlg = document.getElementById('menu') as HTMLDialogElement;
+    const card = dlg.querySelector<HTMLImageElement>('#card')!;
+    const lista = dlg.querySelector('ul')!;
+
+    const opcion = (texto: string, href?: string) => {
+      const li = document.createElement('li');
+      if (href) {
+        const a = document.createElement('a');
+        a.className = 'opcion';
+        a.href = href;
+        a.textContent = texto;
+        li.append(a);
+      } else {
+        const span = document.createElement('span');
+        span.className = 'opcion';
+        span.setAttribute('aria-disabled', 'true');
+        span.textContent = texto;
+        li.append(span);
+      }
+      lista.append(li);
+    };
+
+    const abrir = (id: string) => {
+      const t = datos[id];
+      // Sin esto se ve la card de la pista anterior hasta que carga la nueva.
+      card.removeAttribute('src');
+      card.src = t.card;
+      card.alt = t.nombre;
+      lista.replaceChildren();
+      opcion(t.nombre, `/pistas/${id}`);
+      opcion('Ruta hacia otra pista (próximamente)');
+      dlg.showModal();
+    };
+
+    document.querySelectorAll<HTMLElement>('.pin').forEach((p) =>
+      p.addEventListener('click', () => abrir(p.dataset.pista!))
+    );
+
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+    dlg.querySelector('button')!.addEventListener('click', () => dlg.close());
   </script>
 </Base>
