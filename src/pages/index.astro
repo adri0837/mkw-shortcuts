@@ -1,26 +1,27 @@
 ---
 import Base from '../layouts/Base.astro';
-import { enElMapa, imgDe, rutaDesde, pistas } from '../data/pistas';
+import { enElMapa, imgDe, rutasDesde, pistas } from '../data/pistas';
 
 // Lo único que el menú necesita saber de cada pista. Va en el HTML como un
 // bloque de datos plano, y el script del final lo lee al hacer clic.
-// `ruta` ya viene resuelto como href y `rutaHasta` como el texto del botón.
-// Quedan vacíos si esa pista todavía no tiene ruta declarada.
 const paraMenu = Object.fromEntries(
   enElMapa().map((p) => {
-    const r = rutaDesde(p.id);
-    const hasta = r ? pistas.find((x) => x.id === r.hasta)! : undefined;
+    const rutasDePista = rutasDesde(p.id);
     return [
       p.id,
       {
         nombre: p.nombre,
         card: imgDe(p, 'card'),
-        ruta: r ? `/ruta/${r.id}` : '',
-        rutaHasta: hasta?.nombre ?? '',
-        // Con la opción de ruta encima, el card pasa a ser la composición
-        // A → B en vez de la card sola.
-        rutaCards: hasta ? [imgDe(p, 'card'), '/img/going-to.png', imgDe(hasta, 'card')] : [],
-        rutasPendientes: r?.rutasPendientes ?? 0,
+        rutas: rutasDePista.map((r) => {
+          const hasta = pistas.find((x) => x.id === r.hasta);
+          return {
+            id: r.id,
+            nombreHasta: hasta?.nombre ?? '',
+            href: `/ruta/${r.id}`,
+            cards: hasta ? [imgDe(p, 'card'), '/img/going-to.png', imgDe(hasta, 'card')] : [],
+          };
+        }),
+        rutasPendientes: p.rutasPendientes ?? 0,
       },
     ];
   })
@@ -52,17 +53,21 @@ const paraMenu = Object.fromEntries(
   </dialog>
 
   <script>
-    const datos: Record<
-      string,
-      {
-        nombre: string;
-        card: string;
-        ruta: string;
-        rutaHasta: string;
-        rutaCards: string[];
-        rutasPendientes: number;
-      }
-    > = JSON.parse(document.getElementById('datos')!.textContent!);
+    type DatosPista = {
+      nombre: string;
+      card: string;
+      rutas: {
+        id: string;
+        nombreHasta: string;
+        href: string;
+        cards: string[];
+      }[];
+      rutasPendientes: number;
+    };
+
+    const datos: Record<string, DatosPista> = JSON.parse(
+      document.getElementById('datos')!.textContent!
+    );
     const dlg = document.getElementById('menu') as HTMLDialogElement;
     const cards = document.getElementById('cards')!;
     const lista = dlg.querySelector('ul')!;
@@ -120,16 +125,24 @@ const paraMenu = Object.fromEntries(
       const t = datos[id];
       pintarCards([t.card], t.nombre);
       lista.replaceChildren();
+
+      // 1. Opción de la pista principal
       opcion(t.nombre, `/pistas/${id}`, [t.card]);
-      if (t.ruta) {
-        opcion(t.rutaHasta, t.ruta, t.rutaCards, '>>> ');
-      } else {
-        // Sin ruta declarada no hay nada que enlazar: sigue siendo la opción muerta.
-        opcion(SIN_RUTA);
+
+      // 2. Opciones de cada ruta agregada
+      for (const r of t.rutas) {
+        opcion(r.nombreHasta, r.href, r.cards, '>>> ');
       }
-      // Solo se agrega fila para las rutas cuya cantidad está confirmada en los
-      // datos. Las pistas sin ese dato no se inventan filas.
-      for (let i = 0; i < t.rutasPendientes; i++) opcion(SIN_RUTA);
+
+      // 3. Opciones de "Ruta hacia otra pista, próximamente"
+      if (t.rutas.length === 0 && t.rutasPendientes === 0) {
+        opcion(SIN_RUTA);
+      } else {
+        for (let i = 0; i < t.rutasPendientes; i++) {
+          opcion(SIN_RUTA);
+        }
+      }
+
       dlg.showModal();
     };
 

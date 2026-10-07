@@ -65,9 +65,10 @@ a{color:inherit}
 /* El width explicito es lo que evita el parpadeo: un dialog sin width es
    shrink-to-fit, asi que se agranda solo cuando el contenido es mas ancho
    (1 card = 476px, 3 imagenes = 880px) y eso mueve las opciones de abajo. */
-dialog#menu{border:0;background:none;padding:1rem;color:var(--texto);width:min(760px,94vw);max-height:90vh;overflow:auto}
+dialog#menu{border:0;background:none;padding:1rem;color:var(--texto);width:min(760px,94vw);max-height:94vh;overflow:hidden}
+dialog#menu[open]{display:flex;flex-direction:column;align-items:flex-start}
 dialog#menu::backdrop{background:rgba(10,20,30,.78);backdrop-filter:blur(6px)}
-.menu{display:grid;grid-template-columns:minmax(0,1fr);gap:1.2rem;width:100%}
+.menu{display:flex;flex-direction:column;gap:1rem;width:100%;min-height:0;flex:1}
 /* Todas las cards miden 444x317. Fijar la proporción evita que el alto salte
    mientras carga la imagen. El `data-n` lo pone el script: 1 = una sola card,
    3 = card A + flecha + card B cuando la opción es una ruta. */
@@ -77,7 +78,7 @@ dialog#menu::backdrop{background:rgba(10,20,30,.78);backdrop-filter:blur(6px)}
    grid-template-rows:100% es imprescindible: sin el, la fila se dimensiona por
    contenido, height:100% no resuelve contra la caja y la card desborda encima
    de las opciones. contain y no cover: antes que recortar la card, sobra aire. */
-.cards{display:grid;gap:.5rem;align-content:center;grid-template-rows:100%;height:min(38vw,260px)}
+.cards{display:grid;gap:.5rem;align-content:center;grid-template-rows:100%;height:min(32vh,240px);flex-shrink:0;width:100%}
 /* La caja se angosta en estado 1 para que no quede tanto aire alrededor de la
    card. Es seguro porque el lock depende solo del alto, no del ancho. */
 .cards[data-n="1"]{grid-template-columns:minmax(0,1fr);max-width:400px;margin-inline:auto}
@@ -93,7 +94,7 @@ dialog#menu::backdrop{background:rgba(10,20,30,.78);backdrop-filter:blur(6px)}
    La cuenta usa la misma variable que fija el alto de cada fila, asi que si se
    cambia una se adjusta la otra. Con menos de 6 no hay scroll (max-height, no
    height) y la lista no deja una caja vacia. */
-.menu ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:.6rem;max-height:calc(6 * var(--opcion-alto) + 5 * .6rem);overflow-y:auto;scrollbar-width:thin;overscroll-behavior:contain}
+.menu ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:.6rem;max-height:calc(6 * var(--opcion-alto) + 5 * .6rem);overflow-y:auto;scrollbar-width:thin;overscroll-behavior:contain;min-height:0;flex:1;width:100%}
 .menu>*{min-width:0}
 .opcion{display:flex;align-items:center;min-height:var(--opcion-alto);padding:0 1.2rem;border-radius:999px;background:var(--panel);border:2px solid var(--borde);text-decoration:none}
 a.opcion:hover{background:var(--acento);color:#1a1a1a;border-color:var(--acento-borde)}
@@ -101,7 +102,7 @@ a.opcion:hover{background:var(--acento);color:#1a1a1a;border-color:var(--acento-
    cae a la fuente de respaldo a propósito, no por accidente. */
 .prefijo{font-family:"Trebuchet MS","Segoe UI",sans-serif}
 .opcion[aria-disabled=true]{opacity:.45}
-.cerrar{margin-top:1rem}
+.cerrar{margin-top:.8rem;flex-shrink:0}
 .cabecera{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;margin:1.5rem 0}
 .cabecera img{width:140px}
 /* La copa se queda con la pista: va a la izquierda del nombre, el icono de la

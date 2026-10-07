@@ -48,6 +48,7 @@ export type Pista = {
   posBala?: { x: number; y: number };
   estrategia?: string;
   atajos?: Categoria[];
+  rutasPendientes?: number;
 };
 
 // Copa de cada pista. Va en un mapa aparte y no repetido en las 30 entradas,
@@ -510,6 +511,7 @@ export const pistas: Pista[] = [
     nombre: 'Circuito Mario Bros.',
     posMapa: { x: 24.1, y: 60.1 },
     posBala: { x: 50, y: 50 },
+    rutasPendientes: 6,
     estrategia:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
@@ -914,22 +916,15 @@ export type Ruta = {
   id: string;
   desde: string; // id de pista
   hasta: string; // id de pista
-  // Cuántas rutas del juego todavía no están escritas para este par. Cada una
-  // ocupa una fila del menú con el texto de "próximamente". Es opcional a
-  // propósito: solo se pone en las pistas cuyo número de rutas está confirmado
-  // mirando el juego, no en todas. Mario Bros. Circuit tiene 8 rutas en total
-  // (la pista, la que va a Ciudad Corona y estas 6), ya verificado.
-  rutasPendientes?: number;
   estrategia?: string;
   atajos?: Categoria[];
 };
 
 export const rutas: Ruta[] = [
   {
-    id: 'mario-bros-circuit-a-crown-city',
+    id: 'mario-bros-circuit-a-wario-stadium',
     desde: 'mario-bros-circuit',
-    hasta: 'crown-city',
-    rutasPendientes: 6,
+    hasta: 'wario-stadium',
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [],
   },
@@ -947,5 +942,8 @@ for (const r of rutas) {
   }
 }
 
-/** La ruta que sale de una pista, si hay. El menú la usa para saber si enlazar. */
+/** Todas las rutas que salen de una pista. */
+export const rutasDesde = (pistaId: string) => rutas.filter((r) => r.desde === pistaId);
+
+/** La primera ruta que sale de una pista, si hay. */
 export const rutaDesde = (pistaId: string) => rutas.find((r) => r.desde === pistaId);

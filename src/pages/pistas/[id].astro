@@ -1,6 +1,6 @@
 ---
-import Base from '../../layouts/Base.astro';
-import { pistas, imgDe, copaDe, CLIPS_BASE } from '../../data/pistas';
+import Base from "../../layouts/Base.astro";
+import { pistas, imgDe, copaDe, CLIPS_BASE } from "../../data/pistas";
 export function getStaticPaths() {
   return pistas.map((p) => ({ params: { id: p.id }, props: { p } }));
 }
@@ -9,119 +9,166 @@ const atajos = p.atajos ?? [];
 const hayBala = p.posBala !== undefined;
 const copa = copaDe(p.id);
 ---
+
 <Base>
   <a class="volver" href="/">← Volver al mapa</a>
 
   <header class="cabecera">
     {copa && <img class="copa" src={copa} alt="" />}
     <h1>{p.nombre}</h1>
-    <img class="icono" src={imgDe(p, 'icono')} alt="" />
+    <img class="icono" src={imgDe(p, "icono")} alt="" />
   </header>
 
-  {p.estrategia && (
-    <>
-      <div class="bloque-estrategia">
-        <h2 class="titulo-estrategia">
-          Estrategia
-          <button class="ayuda" aria-label="Qué es cada perfil"></button>
-        </h2>
-        <div class="roles">
-          <p><strong>Runner:</strong> Mejor posición de inicio, primer lugar y correr.</p>
-          <p><strong>Shroomer:</strong> Mejor iniciar en posiciones bajas o medias, conseguir champiñones, tomar atajos y correr.</p>
-          <p><strong>Drafter:</strong> Mejor conseguir rebufos al iniciar la carrera, y entonces correr.</p>
-          <p><strong>Bagger:</strong> Mejor quedarse en posiciones bajas y usar tus objetos para remontar al final.</p>
+  {
+    p.estrategia && (
+      <>
+        <div class="bloque-estrategia">
+          <h2 class="titulo-estrategia">
+            Estrategia
+            <button class="ayuda" aria-label="Qué es cada perfil" />
+          </h2>
+          <div class="roles">
+            <p>
+              <strong>Runner:</strong> Mejor posición de inicio, primer lugar y
+              correr.
+            </p>
+            <p>
+              <strong>Shroomer:</strong> Mejor iniciar en posiciones bajas o
+              medias, conseguir champiñones, tomar atajos y correr.
+            </p>
+            <p>
+              <strong>Drafter:</strong> Mejor conseguir rebufos al iniciar la
+              carrera, y entonces correr.
+            </p>
+            <p>
+              <strong>Bagger:</strong> Mejor quedarse en posiciones bajas y usar
+              tus objetos para remontar al final.
+            </p>
+          </div>
         </div>
-      </div>
-      <p class="estrategia">{p.estrategia}</p>
-    </>
-  )}
+        <p class="estrategia">{p.estrategia}</p>
+      </>
+    )
+  }
 
-  {(atajos.length > 0 || hayBala) && (
-    <div class="acciones">
-      {atajos.length > 0 && <button class="btn" id="btn-atajo" aria-pressed="false">Atajos</button>}
-      {hayBala && (
-        <button class="btn" id="btn-bala" aria-pressed="false">
-          <img src="/img/items/bullet-bill.webp" alt="" />Extensión de bala
-        </button>
-      )}
-      {/* El .mini va DENTRO de .acciones a proposito: es el ancla del popup, y
+  {
+    (atajos.length > 0 || hayBala) && (
+      <div class="acciones">
+        {atajos.length > 0 && (
+          <button class="btn" id="btn-atajo" aria-pressed="false">
+            Atajos
+          </button>
+        )}
+        {hayBala && (
+          <button class="btn" id="btn-bala" aria-pressed="false">
+            <img src="/img/items/bullet-bill.webp" alt="" />
+            Extensión de bala
+          </button>
+        )}
+        {/* El .mini va DENTRO de .acciones a proposito: es el ancla del popup, y
           un position:absolute solo toma como ancla un ancestro. Como hermano se
           leeria contra el viewport y caia a la esquina inferior izquierda. */}
-      {atajos.length > 0 && (
-        <div id="mini" class="mini oculto">
-          {atajos.map((c) => (
-            <button class="btn" data-cat={c.id} aria-pressed="false">
-              {c.icono && <img src={`/img/items/${c.icono}`} alt="" />}{c.nombre}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  )}
+        {atajos.length > 0 && (
+          <div id="mini" class="mini oculto">
+            {atajos.map((c) => (
+              <button class="btn" data-cat={c.id} aria-pressed="false">
+                {c.icono && <img src={`/img/items/${c.icono}`} alt="" />}
+                {c.nombre}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
 
   <!-- LISTAS DE ATAJOS: clip a la izquierda, descripción a la derecha -->
-  {atajos.map((c) => (
-    <section class="lista oculto" id={`lista-${c.id}`}>
-      {c.atajos.map((a) => (
-        <article class="atajo">
-          {a.clip
-            ? <video
-              class="clip"
-              src={`${CLIPS_BASE}/${a.clip}`}
-              poster={`${CLIPS_BASE}/${a.clip.replace(/\.mp4$/, '.jpg')}`}
-              controls
-              preload="metadata"
-            ></video>
-            : <div class="clip">Clip pendiente</div>}
-          <div>
-            <h3>{a.titulo}</h3>
-            <p>{a.descripcion}</p>
-          </div>
-        </article>
-      ))}
-    </section>
-  ))}
+  {
+    atajos.map((c) => (
+      <section class="lista oculto" id={`lista-${c.id}`}>
+        {c.atajos.map((a) => (
+          <article class="atajo">
+            {a.clip ? (
+              <video
+                class="clip"
+                src={`${CLIPS_BASE}/${a.clip}`}
+                poster={`${CLIPS_BASE}/${a.clip.replace(/\.mp4$/, ".jpg")}`}
+                controls
+                preload="metadata"
+              />
+            ) : (
+              <div class="clip">Clip pendiente</div>
+            )}
+            <div>
+              <h3>{a.titulo}</h3>
+              <p>{a.descripcion}</p>
+            </div>
+          </article>
+        ))}
+      </section>
+    ))
+  }
 
   <!-- MINIMAPA CON LA BALA: ajustá posBala {x,y} (%) en src/data/pistas.ts -->
-  {hayBala && (
-    <section id="panel-bala" class="oculto">
-      <div class="minimapa">
-        <img src={imgDe(p, 'minimapa')} alt={`Minimapa de ${p.nombre}`} />
-        <span class="bala" style={`left:${p.posBala!.x}%;top:${p.posBala!.y}%`}>
-          <img src="/img/items/bullet-bill.webp" alt="" />
-        </span>
-      </div>
-    </section>
-  )}
+  {
+    hayBala && (
+      <section id="panel-bala" class="oculto">
+        <div class="minimapa">
+          <img src={imgDe(p, "minimapa")} alt={`Minimapa de ${p.nombre}`} />
+          <span
+            class="bala"
+            style={`left:${p.posBala!.x}%;top:${p.posBala!.y}%`}
+          >
+            <img src="/img/items/bullet-bill.webp" alt="" />
+          </span>
+        </div>
+      </section>
+    )
+  }
 
   <script>
     const $ = (s: string) => document.querySelector<HTMLElement>(s);
-    const btnAtajo = $('#btn-atajo'), btnBala = $('#btn-bala');
-    const mini = $('#mini'), bala = $('#panel-bala');
-    const ocultarListas = () => document.querySelectorAll('.lista').forEach((l) => l.classList.add('oculto'));
-    const marcar = (el: Element, on: boolean) => el.setAttribute('aria-pressed', String(on));
+    const btnAtajo = $("#btn-atajo"),
+      btnBala = $("#btn-bala");
+    const mini = $("#mini"),
+      bala = $("#panel-bala");
+    const marcar = (el: Element, on: boolean) =>
+      el.setAttribute("aria-pressed", String(on));
+    const desmarcarCategorias = () =>
+      document.querySelectorAll("[data-cat]").forEach((x) => marcar(x, false));
+    const ocultarListas = () => {
+      document
+        .querySelectorAll(".lista")
+        .forEach((l) => l.classList.add("oculto"));
+      desmarcarCategorias();
+    };
 
-    btnAtajo?.addEventListener('click', () => {
-      mini?.classList.toggle('oculto');
-      bala?.classList.add('oculto');
+    btnAtajo?.addEventListener("click", () => {
+      mini?.classList.toggle("oculto");
+      bala?.classList.add("oculto");
       if (btnBala) marcar(btnBala, false);
-      const abierto = !mini?.classList.contains('oculto');
+      const abierto = !mini?.classList.contains("oculto");
       if (btnAtajo) marcar(btnAtajo, abierto);
       if (!abierto) ocultarListas();
     });
-    btnBala?.addEventListener('click', () => {
-      const abierto = bala?.classList.toggle('oculto') === false;
+    btnBala?.addEventListener("click", () => {
+      const abierto = bala?.classList.toggle("oculto") === false;
       marcar(btnBala, abierto);
-      if (abierto) { mini?.classList.add('oculto'); ocultarListas(); if (btnAtajo) marcar(btnAtajo, false); }
+      if (abierto) {
+        mini?.classList.add("oculto");
+        ocultarListas();
+        if (btnAtajo) marcar(btnAtajo, false);
+      }
     });
-    document.querySelectorAll<HTMLElement>('[data-cat]').forEach((b) => b.addEventListener('click', () => {
-      ocultarListas();
-      document.querySelectorAll('[data-cat]').forEach((x) => marcar(x, false));
-      marcar(b, true);
-      // El popup se cierra al elegir: si queda abierto tapa el primer video.
-      mini?.classList.add('oculto');
-      if (btnAtajo) marcar(btnAtajo, false);
-      $(`#lista-${b.dataset.cat}`)?.classList.remove('oculto');
-    }));
+    document.querySelectorAll<HTMLElement>("[data-cat]").forEach((b) =>
+      b.addEventListener("click", () => {
+        ocultarListas();
+        marcar(b, true);
+        // El popup se cierra al elegir: si queda abierto tapa el primer video.
+        mini?.classList.add("oculto");
+        if (btnAtajo) marcar(btnAtajo, false);
+        $(`#lista-${b.dataset.cat}`)?.classList.remove("oculto");
+      }),
+    );
   </script>
 </Base>
