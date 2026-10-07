@@ -101,6 +101,7 @@ a.opcion:hover{background:var(--acento);color:#1a1a1a;border-color:var(--acento-
 /* '>>>' no existe en Racers Delight (no tiene > < ni »), así que ese prefijo
    cae a la fuente de respaldo a propósito, no por accidente. */
 .prefijo{font-family:"Trebuchet MS","Segoe UI",sans-serif}
+.prefijo-snes{font-size:.75em;opacity:.78;margin-right:.45rem;letter-spacing:.02em}
 .opcion[aria-disabled=true]{opacity:.45}
 .cerrar{margin-top:.8rem;flex-shrink:0}
 .cabecera{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;margin:1.5rem 0}

@@ -49,6 +49,7 @@ export type Pista = {
   estrategia?: string;
   atajos?: Categoria[];
   rutasPendientes?: number;
+  subpistas?: string[];
 };
 
 // Copa de cada pista. Va en un mapa aparte y no repetido en las 30 entradas,
@@ -63,6 +64,18 @@ const COPAS: Record<string, string[]> = {
   hoja: ['cheep-cheep-falls', 'dandelion-depths', 'boo-cinema', 'dry-bones-burnout'],
   rayo: ['moo-moo-meadows', 'choco-mountain', 'toads-factory', 'bowsers-castle'],
   especial: ['acorn-heights', 'mario-circuit', 'peach-stadium', 'rainbow-road'],
+  vs: [
+    'choco-island-1',
+    'choco-island-2',
+    'mario-circuit-1',
+    'mario-circuit-2',
+    'mario-circuit-3',
+    'ghost-valley-1',
+    'ghost-valley-2',
+    'ghost-valley-3',
+    'vanilla-lake-1',
+    'koopa-beach-1',
+  ],
 };
 
 const COPA_DE = new Map(Object.entries(COPAS).flatMap(([copa, ids]) => ids.map((id) => [id, copa])));
@@ -133,6 +146,7 @@ export const pistas: Pista[] = [
     nombre: 'Cine Boo',
     posMapa: { x: 63.2, y: 17.9 },
     posBala: { x: 50, y: 50 },
+    subpistas: ['ghost-valley-1', 'ghost-valley-2', 'ghost-valley-3'],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -214,6 +228,7 @@ export const pistas: Pista[] = [
     nombre: 'Monte Chocolate',
     posMapa: { x: 38.1, y: 51.4 },
     posBala: { x: 50, y: 50 },
+    subpistas: ['choco-island-1', 'choco-island-2'],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -484,6 +499,7 @@ export const pistas: Pista[] = [
     nombre: 'Playa Koopa',
     posMapa: { x: 49.2, y: 80.2 },
     posBala: { x: 50, y: 50 },
+    subpistas: ['koopa-beach-1'],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -511,7 +527,6 @@ export const pistas: Pista[] = [
     nombre: 'Circuito Mario Bros.',
     posMapa: { x: 24.1, y: 60.1 },
     posBala: { x: 50, y: 50 },
-    rutasPendientes: 6,
     estrategia:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
@@ -520,8 +535,8 @@ export const pistas: Pista[] = [
         nombre: 'NISC',
         icono: '',
         atajos: [
-          { titulo: 'Atajo NISC 1', clip: 'mario-bros-circuit-nisc-1.mp4', descripcion: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
-          { titulo: 'Atajo NISC 2', clip: '', descripcion: 'Sed do eiusmod tempor incididunt ut labore et dolore.' },
+          { titulo: 'NISC #1', clip: 'mario-bros-circuit-nisc-1.mp4', descripcion: 'En la secuencia inicial, te direccionas al segundo cartel verde de Luigi Tires, dirigiéndote a la letra "E" de la palabra "TIRES" mientras realizas un salto cargado con el turbo del Start Boost. Al estar muy cerca del cartel, sueltas el salto cargado, golpeando el cartel y elevándote en el aire. Ahí, rápidamente haces un Trick a la derecha para direccionarte y, sobre todo, tener un turbo al caer en el riel verde. Con esto, tomas una curva mucho más cerrada.' },
+          { titulo: 'NISC #2', clip: '', descripcion: 'Sed do eiusmod tempor incididunt ut labore et dolore.' },
         ],
       },
       {
@@ -543,6 +558,7 @@ export const pistas: Pista[] = [
     nombre: 'Circuito Mario',
     posMapa: { x: 50.4, y: 27.9 },
     posBala: { x: 50, y: 50 },
+    subpistas: ['mario-circuit-1', 'mario-circuit-2', 'mario-circuit-3'],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -732,6 +748,7 @@ export const pistas: Pista[] = [
     nombre: 'Cielos Helados',
     posMapa: { x: 84.7, y: 35.3 },
     posBala: { x: 50, y: 50 },
+    subpistas: ['vanilla-lake-1'],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -889,6 +906,266 @@ export const pistas: Pista[] = [
       },
     ],
   },
+  {
+    id: 'choco-island-1',
+    nombre: 'Isla Chocolate 1',
+    posBala: { x: 50, y: 50 },
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
+    atajos: [
+      {
+        id: 'nisc',
+        nombre: 'NISC',
+        icono: '',
+        atajos: [{ titulo: 'Atajo NISC 1', clip: '', descripcion: '' }],
+      },
+      {
+        id: 'mushroom',
+        nombre: 'Champiñón',
+        icono: 'mushroom.webp',
+        atajos: [{ titulo: 'Atajo con champiñón 1', clip: '', descripcion: '' }],
+      },
+      {
+        id: 'feather',
+        nombre: 'Pluma',
+        icono: 'feather.webp',
+        atajos: [{ titulo: 'Atajo con pluma 1', clip: '', descripcion: '' }],
+      },
+    ],
+  },
+  {
+    id: 'choco-island-2',
+    nombre: 'Isla Chocolate 2',
+    posBala: { x: 50, y: 50 },
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
+    atajos: [
+      {
+        id: 'nisc',
+        nombre: 'NISC',
+        icono: '',
+        atajos: [{ titulo: 'Atajo NISC 1', clip: '', descripcion: '' }],
+      },
+      {
+        id: 'mushroom',
+        nombre: 'Champiñón',
+        icono: 'mushroom.webp',
+        atajos: [{ titulo: 'Atajo con champiñón 1', clip: '', descripcion: '' }],
+      },
+      {
+        id: 'feather',
+        nombre: 'Pluma',
+        icono: 'feather.webp',
+        atajos: [{ titulo: 'Atajo con pluma 1', clip: '', descripcion: '' }],
+      },
+    ],
+  },
+  {
+    id: 'mario-circuit-1',
+    nombre: 'Circuito Mario 1',
+    posBala: { x: 50, y: 50 },
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
+    atajos: [
+      {
+        id: 'nisc',
+        nombre: 'NISC',
+        icono: '',
+        atajos: [{ titulo: 'Atajo NISC 1', clip: '', descripcion: '' }],
+      },
+      {
+        id: 'mushroom',
+        nombre: 'Champiñón',
+        icono: 'mushroom.webp',
+        atajos: [{ titulo: 'Atajo con champiñón 1', clip: '', descripcion: '' }],
+      },
+      {
+        id: 'feather',
+        nombre: 'Pluma',
+        icono: 'feather.webp',
+        atajos: [{ titulo: 'Atajo con pluma 1', clip: '', descripcion: '' }],
+      },
+    ],
+  },
+  {
+    id: 'mario-circuit-2',
+    nombre: 'Circuito Mario 2',
+    posBala: { x: 50, y: 50 },
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
+    atajos: [
+      {
+        id: 'nisc',
+        nombre: 'NISC',
+        icono: '',
+        atajos: [{ titulo: 'Atajo NISC 1', clip: '', descripcion: '' }],
+      },
+      {
+        id: 'mushroom',
+        nombre: 'Champiñón',
+        icono: 'mushroom.webp',
+        atajos: [{ titulo: 'Atajo con champiñón 1', clip: '', descripcion: '' }],
+      },
+      {
+        id: 'feather',
+        nombre: 'Pluma',
+        icono: 'feather.webp',
+        atajos: [{ titulo: 'Atajo con pluma 1', clip: '', descripcion: '' }],
+      },
+    ],
+  },
+  {
+    id: 'mario-circuit-3',
+    nombre: 'Circuito Mario 3',
+    posBala: { x: 50, y: 50 },
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
+    atajos: [
+      {
+        id: 'nisc',
+        nombre: 'NISC',
+        icono: '',
+        atajos: [{ titulo: 'Atajo NISC 1', clip: '', descripcion: '' }],
+      },
+      {
+        id: 'mushroom',
+        nombre: 'Champiñón',
+        icono: 'mushroom.webp',
+        atajos: [{ titulo: 'Atajo con champiñón 1', clip: '', descripcion: '' }],
+      },
+      {
+        id: 'feather',
+        nombre: 'Pluma',
+        icono: 'feather.webp',
+        atajos: [{ titulo: 'Atajo con pluma 1', clip: '', descripcion: '' }],
+      },
+    ],
+  },
+  {
+    id: 'ghost-valley-1',
+    nombre: 'Valle Fantasma 1',
+    posBala: { x: 50, y: 50 },
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
+    atajos: [
+      {
+        id: 'nisc',
+        nombre: 'NISC',
+        icono: '',
+        atajos: [{ titulo: 'Atajo NISC 1', clip: '', descripcion: '' }],
+      },
+      {
+        id: 'mushroom',
+        nombre: 'Champiñón',
+        icono: 'mushroom.webp',
+        atajos: [{ titulo: 'Atajo con champiñón 1', clip: '', descripcion: '' }],
+      },
+      {
+        id: 'feather',
+        nombre: 'Pluma',
+        icono: 'feather.webp',
+        atajos: [{ titulo: 'Atajo con pluma 1', clip: '', descripcion: '' }],
+      },
+    ],
+  },
+  {
+    id: 'ghost-valley-2',
+    nombre: 'Valle Fantasma 2',
+    posBala: { x: 50, y: 50 },
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
+    atajos: [
+      {
+        id: 'nisc',
+        nombre: 'NISC',
+        icono: '',
+        atajos: [{ titulo: 'Atajo NISC 1', clip: '', descripcion: '' }],
+      },
+      {
+        id: 'mushroom',
+        nombre: 'Champiñón',
+        icono: 'mushroom.webp',
+        atajos: [{ titulo: 'Atajo con champiñón 1', clip: '', descripcion: '' }],
+      },
+      {
+        id: 'feather',
+        nombre: 'Pluma',
+        icono: 'feather.webp',
+        atajos: [{ titulo: 'Atajo con pluma 1', clip: '', descripcion: '' }],
+      },
+    ],
+  },
+  {
+    id: 'ghost-valley-3',
+    nombre: 'Valle Fantasma 3',
+    posBala: { x: 50, y: 50 },
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
+    atajos: [
+      {
+        id: 'nisc',
+        nombre: 'NISC',
+        icono: '',
+        atajos: [{ titulo: 'Atajo NISC 1', clip: '', descripcion: '' }],
+      },
+      {
+        id: 'mushroom',
+        nombre: 'Champiñón',
+        icono: 'mushroom.webp',
+        atajos: [{ titulo: 'Atajo con champiñón 1', clip: '', descripcion: '' }],
+      },
+      {
+        id: 'feather',
+        nombre: 'Pluma',
+        icono: 'feather.webp',
+        atajos: [{ titulo: 'Atajo con pluma 1', clip: '', descripcion: '' }],
+      },
+    ],
+  },
+  {
+    id: 'vanilla-lake-1',
+    nombre: 'Lago Vainilla 1',
+    posBala: { x: 50, y: 50 },
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
+    atajos: [
+      {
+        id: 'nisc',
+        nombre: 'NISC',
+        icono: '',
+        atajos: [{ titulo: 'Atajo NISC 1', clip: '', descripcion: '' }],
+      },
+      {
+        id: 'mushroom',
+        nombre: 'Champiñón',
+        icono: 'mushroom.webp',
+        atajos: [{ titulo: 'Atajo con champiñón 1', clip: '', descripcion: '' }],
+      },
+      {
+        id: 'feather',
+        nombre: 'Pluma',
+        icono: 'feather.webp',
+        atajos: [{ titulo: 'Atajo con pluma 1', clip: '', descripcion: '' }],
+      },
+    ],
+  },
+  {
+    id: 'koopa-beach-1',
+    nombre: 'Playa Koopa 1',
+    posBala: { x: 50, y: 50 },
+    estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
+    atajos: [
+      {
+        id: 'nisc',
+        nombre: 'NISC',
+        icono: '',
+        atajos: [{ titulo: 'Atajo NISC 1', clip: '', descripcion: '' }],
+      },
+      {
+        id: 'mushroom',
+        nombre: 'Champiñón',
+        icono: 'mushroom.webp',
+        atajos: [{ titulo: 'Atajo con champiñón 1', clip: '', descripcion: '' }],
+      },
+      {
+        id: 'feather',
+        nombre: 'Pluma',
+        icono: 'feather.webp',
+        atajos: [{ titulo: 'Atajo con pluma 1', clip: '', descripcion: '' }],
+      },
+    ],
+  },
 ];
 
 const IMAGENES = { icono: 'icono.png', card: 'card.png', minimapa: 'minimapa.webp' } as const;
@@ -922,9 +1199,9 @@ export type Ruta = {
 
 export const rutas: Ruta[] = [
   {
-    id: 'mario-bros-circuit-a-wario-stadium',
-    desde: 'mario-bros-circuit',
-    hasta: 'wario-stadium',
+    id: 'acorn-heights-a-boo-cinema',
+    desde: 'acorn-heights',
+    hasta: 'boo-cinema',
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [],
   },

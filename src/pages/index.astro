@@ -7,11 +7,21 @@ import { enElMapa, imgDe, rutasDesde, pistas } from '../data/pistas';
 const paraMenu = Object.fromEntries(
   enElMapa().map((p) => {
     const rutasDePista = rutasDesde(p.id);
+    const subpistasDePista = (p.subpistas ?? []).map((subId) => {
+      const sub = pistas.find((x) => x.id === subId)!;
+      return {
+        id: sub.id,
+        nombre: sub.nombre,
+        href: `/pistas/${sub.id}`,
+        card: imgDe(sub, 'card'),
+      };
+    });
     return [
       p.id,
       {
         nombre: p.nombre,
         card: imgDe(p, 'card'),
+        subpistas: subpistasDePista,
         rutas: rutasDePista.map((r) => {
           const hasta = pistas.find((x) => x.id === r.hasta);
           return {
@@ -56,6 +66,12 @@ const paraMenu = Object.fromEntries(
     type DatosPista = {
       nombre: string;
       card: string;
+      subpistas?: {
+        id: string;
+        nombre: string;
+        href: string;
+        card: string;
+      }[];
       rutas: {
         id: string;
         nombreHasta: string;
@@ -91,7 +107,8 @@ const paraMenu = Object.fromEntries(
       texto: string,
       href?: string,
       cardsDeEsta: string[] = [],
-      prefijo = ''
+      prefijo = '',
+      clasePrefijo = 'prefijo'
     ) => {
       const li = document.createElement('li');
       const el = document.createElement(href ? 'a' : 'span');
@@ -100,7 +117,7 @@ const paraMenu = Object.fromEntries(
       else el.setAttribute('aria-disabled', 'true');
       if (prefijo) {
         const p = document.createElement('span');
-        p.className = 'prefijo';
+        p.className = clasePrefijo;
         p.textContent = prefijo;
         el.append(p);
       }
@@ -129,13 +146,18 @@ const paraMenu = Object.fromEntries(
       // 1. Opción de la pista principal
       opcion(t.nombre, `/pistas/${id}`, [t.card]);
 
-      // 2. Opciones de cada ruta agregada
+      // 2. Subpistas asociadas a esta pista (ej. SNES pistas)
+      for (const sub of t.subpistas ?? []) {
+        opcion(sub.nombre, sub.href, [sub.card], 'SNES', 'prefijo-snes');
+      }
+
+      // 3. Opciones de cada ruta agregada
       for (const r of t.rutas) {
         opcion(r.nombreHasta, r.href, r.cards, '>>> ');
       }
 
-      // 3. Opciones de "Ruta hacia otra pista, próximamente"
-      if (t.rutas.length === 0 && t.rutasPendientes === 0) {
+      // 4. Opciones de "Ruta hacia otra pista, próximamente"
+      if (t.rutas.length === 0 && t.rutasPendientes === 0 && (!t.subpistas || t.subpistas.length === 0)) {
         opcion(SIN_RUTA);
       } else {
         for (let i = 0; i < t.rutasPendientes; i++) {
