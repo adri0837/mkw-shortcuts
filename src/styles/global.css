@@ -1,50 +1,174 @@
 /* La fuente del sistema no la ven los visitantes, así que va servida desde el
    sitio. Solo tiene un peso (Regular) y le falta el ':'. */
-@font-face{font-family:"Racers Delight";src:url("/fonts/RacersDelight.woff2") format("woff2");font-weight:400;font-style:normal;font-display:block}
+@font-face {
+   font-family: "Racers Delight";
+   src: url("/fonts/RacersDelight.woff2") format("woff2");
+   font-weight: 400;
+   font-style: normal;
+   font-display: block
+}
 
-:root{--panel:#fff;--borde:#c3d4e3;--texto:#12202e;--suave:#4a6379;--acento:#ffcf33;--acento-borde:#c99700;--r:14px;--mar:#367cbd;--opcion-alto:3.4rem}
-*{box-sizing:border-box}
-html{color-scheme:light}
+:root {
+   --panel: #fff;
+   --borde: #c3d4e3;
+   --texto: #12202e;
+   --suave: #4a6379;
+   --acento: #ffcf33;
+   --acento-borde: #c99700;
+   --r: 14px;
+   --mar: #367cbd;
+   --opcion-alto: 3.4rem
+}
+
+* {
+   box-sizing: border-box
+}
+
+html {
+   color-scheme: light
+}
+
 /* showModal() no bloquea el scroll del documento: el fondo se sigue moviendo
    con la rueda. */
-html:has(dialog[open]){overflow:hidden}
+html:has(dialog[open]) {
+   overflow: hidden
+}
+
 /* Blanco arriba, mar abajo. El azul final es el mismo del mapa, aclarado para
    que el texto siga teniendo contraste. */
-body{margin:0;min-height:100vh;background:linear-gradient(180deg,#fff 0%,#f2f7fb 40%,#dceaf7 70%,#bcd8ef 100%);color:var(--texto);font-family:"Trebuchet MS","Segoe UI",sans-serif;line-height:1.55}
-h1,h2,h3{font-family:"Arial Black","Segoe UI",sans-serif;font-style:italic;letter-spacing:-.01em;margin:0}
-a{color:inherit}
-:focus-visible{outline:3px solid var(--acento);outline-offset:3px}
-.wrap{max-width:1100px;margin:0 auto;padding:1.5rem 1rem 4rem}
+body {
+   margin: 0;
+   min-height: 100vh;
+   background: linear-gradient(180deg, #fff 0%, #f2f7fb 40%, #dceaf7 70%, #bcd8ef 100%);
+   color: var(--texto);
+   font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+   line-height: 1.55
+}
+
+h1,
+h2,
+h3 {
+   font-family: "Arial Black", "Segoe UI", sans-serif;
+   font-style: italic;
+   letter-spacing: -.01em;
+   margin: 0
+}
+
+a {
+   color: inherit
+}
+
+:focus-visible {
+   outline: 3px solid var(--acento);
+   outline-offset: 3px
+}
+
+.wrap {
+   max-width: 1100px;
+   margin: 0 auto;
+   padding: 1.5rem 1rem 4rem
+}
+
 /* Racers Delight tiene un solo peso (Regular). Si le dejamos font-weight:700 o
    font-style:italic el navegador fabrica un bold y un italic falsos y la
    tipografía queda con sombra. Por eso el agrupado pisa los 400/400 de cada uno. */
-.titulo,.opcion,.btn,.volver,.cabecera h1,.titulo-estrategia,.ayuda,.atajo h3{font-family:"Racers Delight","Trebuchet MS",sans-serif;font-weight:400;font-style:normal}
-.titulo{font-size:clamp(2.2rem,7vw,4.2rem);line-height:1.08;margin:2rem 0 1.5rem;text-align:center;color:#000}
-.titulo span{display:block}
-.titulo span+span{font-size:.62em}
+.titulo,
+.opcion,
+.btn,
+.volver,
+.cabecera h1,
+.titulo-estrategia,
+.ayuda,
+.atajo h3 {
+   font-family: "Racers Delight", "Trebuchet MS", sans-serif;
+   font-weight: 400;
+   font-style: normal
+}
+
+.titulo {
+   font-size: clamp(2.2rem, 7vw, 4.2rem);
+   line-height: 1.08;
+   margin: 2rem 0 1.5rem;
+   text-align: center;
+   color: #000
+}
+
+.titulo span {
+   display: block
+}
+
+.titulo span+span {
+   font-size: .62em
+}
+
 /* Las cinco letras de "World" van una por color, como en el logo. Uso <i> y no
    <span> a propósito: .titulo span{display:block} manda sobre cualquier span
    anidado y las letras se irían una por línea. El <i> es inline, y .titulo ya
    anula itálica y negrita, así que solo falta el color. Los cinco pasan 3:1
    sobre el blanco del degradado, que es lo que pide texto grande. */
-.letra-w{color:#d97706}
-.letra-o{color:#1f4e8c}
-.letra-r{color:#2f9e44}
-.letra-l{color:#e03131}
+.letra-w {
+   color: #f6d608
+}
+
+.letra-o {
+   color: #1f4e8c
+}
+
+.letra-r {
+   color: #2f9e44
+}
+
+.letra-l {
+   color: #e03131
+}
+
 /* Contorno solo en "World". Los <i> son las únicas letras del título, así que
    un selector sobre ellos evita tener que envolver el texto en otro wrapper. 0.06em
    acompaña al clamp() del tamaño en vez de fijar un px, y paint-order pinta el
    relleno encima del trazo para que la letra no adelgaze. */
-.titulo i{-webkit-text-stroke:.09em #000;paint-order:stroke fill}
-.letra-d{color:#0891b2}
+.titulo i {
+   -webkit-text-stroke: .09em #000;
+   paint-order: stroke fill
+}
+
+.letra-d {
+   color: #0891b2
+}
+
 /* Sin font:inherit ni font-weight:700: ambos venian DESPUES del grupo de
    Racers Delight y lo pisaban (font:inherit resetea font-family al valor
    heredado y el 700 fabricaba una negrita falsa). La familia y el 400 los
    pone el grupo. */
-.btn{display:inline-flex;align-items:center;gap:.6rem;padding:.7rem 1.4rem;border-radius:999px;border:2px solid var(--borde);background:var(--panel);color:var(--texto);cursor:pointer;text-decoration:none}
-.btn:hover,.btn[aria-pressed=true]{background:var(--acento);color:#1a1a1a;border-color:var(--acento-borde)}
-.oculto{display:none!important}
-.mapa{position:relative;border-radius:var(--r);overflow:hidden}
+.btn {
+   display: inline-flex;
+   align-items: center;
+   gap: .6rem;
+   padding: .7rem 1.4rem;
+   border-radius: 999px;
+   border: 2px solid var(--borde);
+   background: var(--panel);
+   color: var(--texto);
+   cursor: pointer;
+   text-decoration: none
+}
+
+.btn:hover,
+.btn[aria-pressed=true] {
+   background: var(--acento);
+   color: #1a1a1a;
+   border-color: var(--acento-borde)
+}
+
+.oculto {
+   display: none !important
+}
+
+.mapa {
+   position: relative;
+   border-radius: var(--r);
+   overflow: hidden
+}
+
 /* El mapa es un rectángulo opaco (no tiene canal alfa) y los cuatro bordes son
    el mismo #3D7CB6, azul saturado. Pegado sobre un fondo que termina en #bcd8ef
    el filo se nota, por más que las esquinas estén redondeadas.
@@ -52,23 +176,70 @@ a{color:inherit}
    las dos se cruzan, así la transición queda en los cuatro lados. Al ser
    uniforme el borde, desvanecerlo no se come contenido.
    Los pines son hermanos de la img, no se enmascaran: quedan nítidos. */
-.mapa>img{
-  display:block;width:100%;height:auto;
-  -webkit-mask-image:linear-gradient(to right,transparent,#000 11%,#000 89%,transparent),linear-gradient(to bottom,transparent,#000 11%,#000 89%,transparent);
-  -webkit-mask-composite:source-in;
-  mask-image:linear-gradient(to right,transparent,#000 11%,#000 89%,transparent),linear-gradient(to bottom,transparent,#000 11%,#000 89%,transparent);
-  mask-composite:intersect;
+.mapa>img {
+   display: block;
+   width: 100%;
+   height: auto;
+   -webkit-mask-image: linear-gradient(to right, transparent, #000 11%, #000 89%, transparent), linear-gradient(to bottom, transparent, #000 11%, #000 89%, transparent);
+   -webkit-mask-composite: source-in;
+   mask-image: linear-gradient(to right, transparent, #000 11%, #000 89%, transparent), linear-gradient(to bottom, transparent, #000 11%, #000 89%, transparent);
+   mask-composite: intersect;
 }
-.pin{position:absolute;width:9%;min-width:44px;transform:translate(-50%,-50%);background:none;border:0;padding:0;cursor:pointer;transition:transform .15s}
-.pin:hover{transform:translate(-50%,-50%) scale(1.15)}
-.pin img{width:100%;display:block}
+
+.pin {
+   position: absolute;
+   width: 9%;
+   min-width: 44px;
+   transform: translate(-50%, -50%);
+   background: none;
+   border: 0;
+   padding: 0;
+   cursor: pointer;
+   transition: transform .15s
+}
+
+.pin:hover {
+   transform: translate(-50%, -50%) scale(1.15)
+}
+
+.pin img {
+   width: 100%;
+   display: block
+}
+
 /* El width explicito es lo que evita el parpadeo: un dialog sin width es
    shrink-to-fit, asi que se agranda solo cuando el contenido es mas ancho
    (1 card = 476px, 3 imagenes = 880px) y eso mueve las opciones de abajo. */
-dialog#menu{border:0;background:none;padding:1rem;color:var(--texto);width:min(760px,94vw);max-height:94vh;overflow:hidden}
-dialog#menu[open]{display:flex;flex-direction:column;align-items:flex-start}
-dialog#menu::backdrop{background:rgba(10,20,30,.78);backdrop-filter:blur(6px)}
-.menu{display:flex;flex-direction:column;gap:1rem;width:100%;min-height:0;flex:1}
+dialog#menu {
+   border: 0;
+   background: none;
+   padding: 1rem;
+   color: var(--texto);
+   width: min(760px, 94vw);
+   max-height: 94vh;
+   overflow: hidden
+}
+
+dialog#menu[open] {
+   display: flex;
+   flex-direction: column;
+   align-items: flex-start
+}
+
+dialog#menu::backdrop {
+   background: rgba(10, 20, 30, .78);
+   backdrop-filter: blur(6px)
+}
+
+.menu {
+   display: flex;
+   flex-direction: column;
+   gap: 1rem;
+   width: 100%;
+   min-height: 0;
+   flex: 1
+}
+
 /* Todas las cards miden 444x317. Fijar la proporción evita que el alto salte
    mientras carga la imagen. El `data-n` lo pone el script: 1 = una sola card,
    3 = card A + flecha + card B cuando la opción es una ruta. */
@@ -78,46 +249,190 @@ dialog#menu::backdrop{background:rgba(10,20,30,.78);backdrop-filter:blur(6px)}
    grid-template-rows:100% es imprescindible: sin el, la fila se dimensiona por
    contenido, height:100% no resuelve contra la caja y la card desborda encima
    de las opciones. contain y no cover: antes que recortar la card, sobra aire. */
-.cards{display:grid;gap:.5rem;align-content:center;grid-template-rows:100%;height:min(32vh,240px);flex-shrink:0;width:100%}
+.cards {
+   display: grid;
+   gap: .5rem;
+   align-content: center;
+   grid-template-rows: 100%;
+   height: min(32vh, 240px);
+   flex-shrink: 0;
+   width: 100%
+}
+
 /* La caja se angosta en estado 1 para que no quede tanto aire alrededor de la
    card. Es seguro porque el lock depende solo del alto, no del ancho. */
-.cards[data-n="1"]{grid-template-columns:minmax(0,1fr);max-width:400px;margin-inline:auto}
-.cards[data-n="3"]{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center}
-.cards img{height:100%;width:100%;object-fit:contain;border-radius:var(--r);display:block;animation:cardEntra .24s ease-out both}
+.cards[data-n="1"] {
+   grid-template-columns: minmax(0, 1fr);
+   max-width: 400px;
+   margin-inline: auto
+}
+
+.cards[data-n="3"] {
+   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+   align-items: center
+}
+
+.cards img {
+   height: 100%;
+   width: 100%;
+   object-fit: contain;
+   border-radius: var(--r);
+   display: block;
+   animation: cardEntra .24s ease-out both
+}
+
 /* El script reemplaza los <img> con otros nuevos, así que la animación sola se
    reinicia en cada cambio: no hay que forzar el reflow a mano. */
-@keyframes cardEntra{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:none}}
-.cards img.going{height:auto;width:auto;max-width:min(130px,22vw)}
+@keyframes cardEntra {
+   from {
+      opacity: 0;
+      transform: scale(.98)
+   }
+
+   to {
+      opacity: 1;
+      transform: none
+   }
+}
+
+.cards img.going {
+   height: auto;
+   width: auto;
+   max-width: min(130px, 22vw)
+}
+
 /* La columna implícita de un grid es `auto`, o sea se estira al texto más
    largo y las opciones se salen de su columna encima de la card. */
 /* 6 opciones visibles: 6 filas de --opcion-alto + los 5 gaps que las separan.
    La cuenta usa la misma variable que fija el alto de cada fila, asi que si se
    cambia una se adjusta la otra. Con menos de 6 no hay scroll (max-height, no
    height) y la lista no deja una caja vacia. */
-.menu ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:.6rem;max-height:calc(6 * var(--opcion-alto) + 5 * .6rem);overflow-y:auto;scrollbar-width:thin;overscroll-behavior:contain;min-height:0;flex:1;width:100%}
-.menu>*{min-width:0}
-.opcion{display:flex;align-items:center;min-height:var(--opcion-alto);padding:0 1.2rem;border-radius:999px;background:var(--panel);border:2px solid var(--borde);text-decoration:none}
-a.opcion:hover{background:var(--acento);color:#1a1a1a;border-color:var(--acento-borde)}
+.menu ul {
+   list-style: none;
+   margin: 0;
+   padding: 0;
+   display: grid;
+   grid-template-columns: minmax(0, 1fr);
+   gap: .6rem;
+   max-height: calc(6 * var(--opcion-alto) + 5 * .6rem);
+   overflow-y: auto;
+   scrollbar-width: thin;
+   overscroll-behavior: contain;
+   min-height: 0;
+   flex: 1;
+   width: 100%
+}
+
+.menu>* {
+   min-width: 0
+}
+
+.opcion {
+   display: flex;
+   align-items: center;
+   min-height: var(--opcion-alto);
+   padding: 0 1.2rem;
+   border-radius: 999px;
+   background: var(--panel);
+   border: 2px solid var(--borde);
+   text-decoration: none
+}
+
+a.opcion:hover {
+   background: var(--acento);
+   color: #1a1a1a;
+   border-color: var(--acento-borde)
+}
+
 /* '>>>' no existe en Racers Delight (no tiene > < ni »), así que ese prefijo
    cae a la fuente de respaldo a propósito, no por accidente. */
-.prefijo{font-family:"Trebuchet MS","Segoe UI",sans-serif}
-.prefijo-snes{font-size:.75em;opacity:.78;margin-right:.45rem;letter-spacing:.02em}
-.opcion[aria-disabled=true]{opacity:.45}
-.cerrar{margin-top:.8rem;flex-shrink:0}
-.cabecera{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;margin:1.5rem 0}
-.cabecera img{width:140px}
+.prefijo {
+   font-family: "Trebuchet MS", "Segoe UI", sans-serif
+}
+
+.prefijo-snes {
+   font-size: .75em;
+   opacity: .78;
+   margin-right: .45rem;
+   letter-spacing: .02em
+}
+
+.opcion[aria-disabled=true] {
+   opacity: .45
+}
+
+.cerrar {
+   margin-top: .8rem;
+   flex-shrink: 0
+}
+
+.cabecera {
+   display: flex;
+   align-items: center;
+   gap: 1.2rem;
+   flex-wrap: wrap;
+   margin: 1.5rem 0
+}
+
+.cabecera img {
+   width: 140px
+}
+
 /* La copa se queda con la pista: va a la izquierda del nombre, el icono de la
    pista se corrió a la derecha. Es más chica que el icono para no competir, y
    mantiene la misma proporción que antes (0.58). */
-.cabecera .copa{width:115px}
-.cabecera h1{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;font-size:2.1rem}
-.cabecera h1 .par{display:flex;align-items:center;gap:.6rem}
-.flecha{font-size:1.8rem;color:var(--suave)}
-.ruta-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:1.5rem;margin:1.5rem 0}
-.ruta-cards figure{margin:0}
-.ruta-cards .card{width:100%;aspect-ratio:444/317;border-radius:var(--r);display:block}
-.ruta-cards figcaption{margin-top:.5rem;font-weight:700;text-align:center}
-.estrategia{max-width:70ch;color:var(--suave)}
+.cabecera .copa {
+   width: 115px
+}
+
+.cabecera h1 {
+   display: flex;
+   align-items: center;
+   gap: .8rem;
+   flex-wrap: wrap;
+   font-size: 2.1rem
+}
+
+.cabecera h1 .par {
+   display: flex;
+   align-items: center;
+   gap: .6rem
+}
+
+.flecha {
+   font-size: 1.8rem;
+   color: var(--suave)
+}
+
+.ruta-cards {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+   gap: 1.5rem;
+   margin: 1.5rem 0
+}
+
+.ruta-cards figure {
+   margin: 0
+}
+
+.ruta-cards .card {
+   width: 100%;
+   aspect-ratio: 444/317;
+   border-radius: var(--r);
+   display: block
+}
+
+.ruta-cards figcaption {
+   margin-top: .5rem;
+   font-weight: 700;
+   text-align: center
+}
+
+.estrategia {
+   max-width: 70ch;
+   color: var(--suave)
+}
+
 /* El "?" abre el glosario de perfiles por hover, no por click. El popup va
    superpuesto (absolute), asi que no empuja el parrafo de la estrategia.
    El trigger es solo el circulo, mas el panel para poder entrar a leerlo: el
@@ -126,41 +441,181 @@ a.opcion:hover{background:var(--acento);color:#1a1a1a;border-color:var(--acento-
    cruzar al bajar el mouse y el popup no parpadea.
    :focus-visible cubre el teclado y NO matchea el click, asi que el click no
    lo abre. */
-.titulo-estrategia{display:flex;align-items:center;gap:.6rem;margin:0}
-.ayuda::before{content:"?"}
-.ayuda{width:1.7rem;height:1.7rem;flex:0 0 auto;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;padding:0;background:#e2e9f0;border:1px solid #b9c6d2;color:var(--suave);cursor:pointer}
-.ayuda:hover{background:#cfdae5;color:var(--texto)}
-.bloque-estrategia:has(.ayuda:is(:hover,:focus-visible)) .roles,
-.bloque-estrategia:has(.roles:hover) .roles{display:block}
-.bloque-estrategia:has(.ayuda:is(:hover,:focus-visible)) .ayuda::before,
-.bloque-estrategia:has(.roles:hover) .ayuda::before{content:"¿"}
-.bloque-estrategia{position:relative;margin:1.6rem 0 .8rem}
+.titulo-estrategia {
+   display: flex;
+   align-items: center;
+   gap: .6rem;
+   margin: 0
+}
+
+.ayuda::before {
+   content: "?"
+}
+
+.ayuda {
+   width: 1.7rem;
+   height: 1.7rem;
+   flex: 0 0 auto;
+   border-radius: 50%;
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   padding: 0;
+   background: #e2e9f0;
+   border: 1px solid #b9c6d2;
+   color: var(--suave);
+   cursor: pointer
+}
+
+.ayuda:hover {
+   background: #cfdae5;
+   color: var(--texto)
+}
+
+.bloque-estrategia:has(.ayuda:is(:hover, :focus-visible)) .roles,
+.bloque-estrategia:has(.roles:hover) .roles {
+   display: block
+}
+
+.bloque-estrategia:has(.ayuda:is(:hover, :focus-visible)) .ayuda::before,
+.bloque-estrategia:has(.roles:hover) .ayuda::before {
+   content: "¿"
+}
+
+.bloque-estrategia {
+   position: relative;
+   margin: 1.6rem 0 .8rem
+}
+
 /* Los dos popups (glosario de perfiles y menu de atajos) son el MISMO panel:
    superpuestos, fondo blanco, borde y sombra. Se definen juntos para que no
    se desincronicen. */
-.roles,.mini{position:absolute;top:100%;left:0;padding:.5rem;border:2px solid var(--borde);border-radius:var(--r);background:var(--panel);box-shadow:0 10px 28px rgba(18,32,46,.22)}
+.roles,
+.mini {
+   position: absolute;
+   top: 100%;
+   left: 0;
+   padding: .5rem;
+   border: 2px solid var(--borde);
+   border-radius: var(--r);
+   background: var(--panel);
+   box-shadow: 0 10px 28px rgba(18, 32, 46, .22)
+}
+
 /* z-index aparte porque el bloque de Estrategia va ANTES que .acciones en el
    DOM: con el mismo z-index gana el ultimo, y el de atajos tapaba al del "?". */
-.mini{z-index:5}
-.roles{z-index:9}
-.roles{display:none;max-width:min(70ch,92vw)}
-.roles p{margin:.7rem 0}
-.mini{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.5rem}
+.mini {
+   z-index: 5
+}
+
+.roles {
+   z-index: 9
+}
+
+.roles {
+   display: none;
+   max-width: min(70ch, 92vw)
+}
+
+.roles p {
+   margin: .7rem 0
+}
+
+.mini {
+   display: flex;
+   gap: .8rem;
+   flex-wrap: wrap;
+   margin-top: .5rem
+}
+
 /* El menu de atajos (NISC / Champinon / Pluma) es un popup pegado debajo del
    boton y no una fila en el flujo: asi no empuja el texto de la estrategia.
    .acciones es el ancla porque el .mini es su hermano siguiente. */
-.acciones{position:relative;display:flex;gap:.8rem;flex-wrap:wrap;margin:1.5rem 0}
+.acciones {
+   position: relative;
+   display: flex;
+   gap: .8rem;
+   flex-wrap: wrap;
+   margin: 1.5rem 0
+}
+
 /* .mini comparte el panel con .roles (ver arriba): superpuesto y con sombra. */
 /* El item va suelto al lado del texto, sin circulo. contain y no cover porque
    los assets vienen con proporciones distintas (bullet-bill 180x110, mushroom
    180x178, feather 180x180) y cover le comia casi el 40% del ancho a la bala. */
-.btn img{width:1.6rem;height:1.6rem;object-fit:contain;flex:0 0 auto}
-.atajo{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:1.5rem;padding:1rem 0;border-top:1px solid var(--borde)}
-.clip{aspect-ratio:16/9;width:100%;border-radius:var(--r);background:var(--panel);border:2px dashed var(--borde);display:grid;place-items:center;color:var(--suave)}
-video.clip{border-style:solid;background:#000}
-.minimapa{position:relative;display:inline-block;background:#f3f0e6;border-radius:var(--r);padding:1rem}
-.minimapa img{display:block;width:min(320px,80vw)}
-.bala{position:absolute;width:2rem;height:2rem;transform:translate(-50%,-50%);display:grid;place-items:center;background:#1a1a1a;border-radius:50%;overflow:hidden}
-.bala img{width:100%;height:100%;object-fit:contain}
-@media(max-width:700px){.menu,.atajo{grid-template-columns:1fr}}
-@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.btn img {
+   width: 1.6rem;
+   height: 1.6rem;
+   object-fit: contain;
+   flex: 0 0 auto
+}
+
+.atajo {
+   display: grid;
+   grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+   gap: 1.5rem;
+   padding: 1rem 0;
+   border-top: 1px solid var(--borde)
+}
+
+.clip {
+   aspect-ratio: 16/9;
+   width: 100%;
+   border-radius: var(--r);
+   background: var(--panel);
+   border: 2px dashed var(--borde);
+   display: grid;
+   place-items: center;
+   color: var(--suave)
+}
+
+video.clip {
+   border-style: solid;
+   background: #000
+}
+
+.minimapa {
+   position: relative;
+   display: inline-block;
+   background: #f3f0e6;
+   border-radius: var(--r);
+   padding: 1rem
+}
+
+.minimapa img {
+   display: block;
+   width: min(320px, 80vw)
+}
+
+.bala {
+   position: absolute;
+   width: 2rem;
+   height: 2rem;
+   transform: translate(-50%, -50%);
+   display: grid;
+   place-items: center;
+   background: #1a1a1a;
+   border-radius: 50%;
+   overflow: hidden
+}
+
+.bala img {
+   width: 100%;
+   height: 100%;
+   object-fit: contain
+}
+
+@media(max-width:700px) {
+
+   .menu,
+   .atajo {
+      grid-template-columns: 1fr
+   }
+}
+
+@media(prefers-reduced-motion:reduce) {
+   * {
+      transition: none !important;
+      animation: none !important
+   }
+}

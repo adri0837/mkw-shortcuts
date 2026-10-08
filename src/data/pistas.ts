@@ -536,20 +536,27 @@ export const pistas: Pista[] = [
         icono: '',
         atajos: [
           { titulo: 'NISC #1', clip: 'mario-bros-circuit-nisc-1.mp4', descripcion: 'En la secuencia inicial, te direccionas al segundo cartel verde de Luigi Tires, dirigiéndote a la letra "E" de la palabra "TIRES" mientras realizas un salto cargado con el turbo del Start Boost. Al estar muy cerca del cartel, sueltas el salto cargado, golpeando el cartel y elevándote en el aire. Ahí, rápidamente haces un Trick a la derecha para direccionarte y, sobre todo, tener un turbo al caer en el riel verde. Con esto, tomas una curva mucho más cerrada.' },
-          { titulo: 'NISC #2', clip: '', descripcion: 'Sed do eiusmod tempor incididunt ut labore et dolore.' },
+          { titulo: 'NISC #2', clip: 'mario-bros-circuit-nisc-2.mp4', descripcion: 'Sed do eiusmod tempor incididunt ut labore et dolore.' },
+          { titulo: 'NISC #3', clip: 'mario-bros-circuit-nisc-3.mp4', descripcion: 'Sed do eiusmod tempor incididunt ut labore et dolore.' },
         ],
       },
       {
         id: 'mushroom',
         nombre: 'Champiñón',
         icono: 'mushroom.webp',
-        atajos: [{ titulo: 'Atajo con champiñón 1', clip: '', descripcion: 'Ut enim ad minim veniam, quis nostrud exercitation.' }],
+        atajos: [
+          { titulo: 'Atajo con champiñón 1', clip: 'mario-bros-circuit-mushroom-1.mp4', descripcion: 'Ut enim ad minim veniam, quis nostrud exercitation.' },
+          { titulo: 'Atajo con champiñón 2', clip: 'mario-bros-circuit-mushroom-2.mp4', descripcion: 'Ut enim ad minim veniam, quis nostrud exercitation.' },
+        ],
       },
       {
         id: 'feather',
         nombre: 'Pluma',
         icono: 'feather.webp',
-        atajos: [{ titulo: 'Atajo con pluma 1', clip: '', descripcion: 'Duis aute reprehenderit in voluptate.' }],
+        atajos: [
+          { titulo: 'Atajo con pluma 1', clip: 'mario-bros-circuit-feather-1.mp4', descripcion: 'Duis aute reprehenderit in voluptate.' },
+          { titulo: 'Atajo con pluma 2', clip: 'mario-bros-circuit-feather-2.mp4', descripcion: 'Duis aute reprehenderit in voluptate.' },
+        ],
       },
     ],
   },

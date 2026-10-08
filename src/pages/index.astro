@@ -1,6 +1,6 @@
 ---
-import Base from '../layouts/Base.astro';
-import { enElMapa, imgDe, rutasDesde, pistas } from '../data/pistas';
+import Base from "../layouts/Base.astro";
+import { enElMapa, imgDe, rutasDesde, pistas } from "../data/pistas";
 
 // Lo único que el menú necesita saber de cada pista. Va en el HTML como un
 // bloque de datos plano, y el script del final lo lee al hacer clic.
@@ -13,44 +13,65 @@ const paraMenu = Object.fromEntries(
         id: sub.id,
         nombre: sub.nombre,
         href: `/pistas/${sub.id}`,
-        card: imgDe(sub, 'card'),
+        card: imgDe(sub, "card"),
       };
     });
     return [
       p.id,
       {
         nombre: p.nombre,
-        card: imgDe(p, 'card'),
+        card: imgDe(p, "card"),
         subpistas: subpistasDePista,
         rutas: rutasDePista.map((r) => {
           const hasta = pistas.find((x) => x.id === r.hasta);
           return {
             id: r.id,
-            nombreHasta: hasta?.nombre ?? '',
+            nombreHasta: hasta?.nombre ?? "",
             href: `/ruta/${r.id}`,
-            cards: hasta ? [imgDe(p, 'card'), '/img/going-to.png', imgDe(hasta, 'card')] : [],
+            cards: hasta
+              ? [imgDe(p, "card"), "/img/going-to.png", imgDe(hasta, "card")]
+              : [],
           };
         }),
         rutasPendientes: p.rutasPendientes ?? 0,
       },
     ];
-  })
+  }),
 );
 ---
+
 <Base>
-  <h1 class="titulo"><span>Mario Kart <i class="letra-w">W</i><i class="letra-o">o</i><i class="letra-r">r</i><i class="letra-l">l</i><i class="letra-d">d</i></span><span>Atajos y Estrategias</span></h1>
+  <h1 class="titulo">
+    <span
+      >MARIO KART <i class="letra-w">W</i><i class="letra-o">O</i><i
+        class="letra-r">R</i
+      ><i class="letra-l">L</i><i class="letra-d">D</i></span
+    ><span>Atajos y Estrategias</span>
+  </h1>
 
   <!-- MAPA: cada pista es un pin. Ajustá la posición con posMapa {x,y} (%) en src/data/pistas.ts -->
   <div class="mapa">
     <img src="/img/mapa-mundo.webp" alt="Mapa de Mario Kart World" />
-    {enElMapa().map((p) => (
-      <button class="pin" data-pista={p.id} style={`left:${p.posMapa!.x}%;top:${p.posMapa!.y}%`} aria-label={p.nombre}>
-        <img src={imgDe(p, 'icono')} alt="" />
-      </button>
-    ))}
+    {
+      enElMapa().map((p) => (
+        <button
+          class="pin"
+          data-pista={p.id}
+          style={`left:${p.posMapa!.x}%;top:${p.posMapa!.y}%`}
+          aria-label={p.nombre}
+        >
+          <img src={imgDe(p, "icono")} alt="" />
+        </button>
+      ))
+    }
   </div>
 
-  <script type="application/json" id="datos" is:inline set:html={JSON.stringify(paraMenu)} />
+  <script
+    type="application/json"
+    id="datos"
+    is:inline
+    set:html={JSON.stringify(paraMenu)}
+  />
 
   <!-- MENÚ DE PISTA: un solo diálogo para las 30 pistas. Las rutas hacia otras
        pistas entran acá cuando estén. -->
@@ -82,11 +103,11 @@ const paraMenu = Object.fromEntries(
     };
 
     const datos: Record<string, DatosPista> = JSON.parse(
-      document.getElementById('datos')!.textContent!
+      document.getElementById("datos")!.textContent!,
     );
-    const dlg = document.getElementById('menu') as HTMLDialogElement;
-    const cards = document.getElementById('cards')!;
-    const lista = dlg.querySelector('ul')!;
+    const dlg = document.getElementById("menu") as HTMLDialogElement;
+    const cards = document.getElementById("cards")!;
+    const lista = dlg.querySelector("ul")!;
 
     // `n` imágenes de la fila actual: 1 = la card de la pista, 3 = A → flecha → B.
     // `going` marca la del medio para que el CSS no le imponga el recorte 444x317.
@@ -94,12 +115,12 @@ const paraMenu = Object.fromEntries(
       cards.dataset.n = String(urls.length);
       cards.replaceChildren(
         ...urls.map((u) => {
-          const img = document.createElement('img');
+          const img = document.createElement("img");
           img.src = u;
           img.alt = alt;
-          if (urls.length === 3 && u === urls[1]) img.className = 'going';
+          if (urls.length === 3 && u === urls[1]) img.className = "going";
           return img;
-        })
+        }),
       );
     };
 
@@ -107,16 +128,16 @@ const paraMenu = Object.fromEntries(
       texto: string,
       href?: string,
       cardsDeEsta: string[] = [],
-      prefijo = '',
-      clasePrefijo = 'prefijo'
+      prefijo = "",
+      clasePrefijo = "prefijo",
     ) => {
-      const li = document.createElement('li');
-      const el = document.createElement(href ? 'a' : 'span');
-      el.className = 'opcion';
+      const li = document.createElement("li");
+      const el = document.createElement(href ? "a" : "span");
+      el.className = "opcion";
       if (href) (el as HTMLAnchorElement).href = href;
-      else el.setAttribute('aria-disabled', 'true');
+      else el.setAttribute("aria-disabled", "true");
       if (prefijo) {
-        const p = document.createElement('span');
+        const p = document.createElement("span");
         p.className = clasePrefijo;
         p.textContent = prefijo;
         el.append(p);
@@ -126,8 +147,10 @@ const paraMenu = Object.fromEntries(
       // Sin cards no hay nada que pintar. Sin este guard un placeholder borra la
       // card de arriba: data-n=0 no tiene regla y el area se colapsa.
       if (cardsDeEsta.length) {
-        el.addEventListener('mouseenter', () => pintarCards(cardsDeEsta, texto));
-        el.addEventListener('focus', () => pintarCards(cardsDeEsta, texto));
+        el.addEventListener("mouseenter", () =>
+          pintarCards(cardsDeEsta, texto),
+        );
+        el.addEventListener("focus", () => pintarCards(cardsDeEsta, texto));
       }
       li.append(el);
       lista.append(li);
@@ -136,7 +159,7 @@ const paraMenu = Object.fromEntries(
     // Un solo lugar para el texto de "todavía no está": si las pistas que no tienen
     // ruta y las rutas pendientes usaran dos strings distintos, el menú dejaría
     // de ser uniforme.
-    const SIN_RUTA = 'Ruta hacia otra pista, próximamente';
+    const SIN_RUTA = "Ruta hacia otra pista, próximamente";
 
     const abrir = (id: string) => {
       const t = datos[id];
@@ -148,16 +171,20 @@ const paraMenu = Object.fromEntries(
 
       // 2. Subpistas asociadas a esta pista (ej. SNES pistas)
       for (const sub of t.subpistas ?? []) {
-        opcion(sub.nombre, sub.href, [sub.card], 'SNES', 'prefijo-snes');
+        opcion(sub.nombre, sub.href, [sub.card], "SNES", "prefijo-snes");
       }
 
       // 3. Opciones de cada ruta agregada
       for (const r of t.rutas) {
-        opcion(r.nombreHasta, r.href, r.cards, '>>> ');
+        opcion(r.nombreHasta, r.href, r.cards, ">>> ");
       }
 
       // 4. Opciones de "Ruta hacia otra pista, próximamente"
-      if (t.rutas.length === 0 && t.rutasPendientes === 0 && (!t.subpistas || t.subpistas.length === 0)) {
+      if (
+        t.rutas.length === 0 &&
+        t.rutasPendientes === 0 &&
+        (!t.subpistas || t.subpistas.length === 0)
+      ) {
         opcion(SIN_RUTA);
       } else {
         for (let i = 0; i < t.rutasPendientes; i++) {
@@ -168,11 +195,15 @@ const paraMenu = Object.fromEntries(
       dlg.showModal();
     };
 
-    document.querySelectorAll<HTMLElement>('.pin').forEach((p) =>
-      p.addEventListener('click', () => abrir(p.dataset.pista!))
-    );
+    document
+      .querySelectorAll<HTMLElement>(".pin")
+      .forEach((p) =>
+        p.addEventListener("click", () => abrir(p.dataset.pista!)),
+      );
 
-    dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
-    dlg.querySelector('button')!.addEventListener('click', () => dlg.close());
+    dlg.addEventListener("click", (e) => {
+      if (e.target === dlg) dlg.close();
+    });
+    dlg.querySelector("button")!.addEventListener("click", () => dlg.close());
   </script>
 </Base>
