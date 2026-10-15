@@ -195,7 +195,8 @@ a {
    border: 0;
    padding: 0;
    cursor: pointer;
-   transition: transform .15s
+   transition: transform .15s;
+   z-index: 10;
 }
 
 .pin:hover {
@@ -610,6 +611,475 @@ video.clip {
    .menu,
    .atajo {
       grid-template-columns: 1fr
+   }
+}
+
+/* --- SELECTOR DE MODO (Carreras vs Knockout Tour) --- */
+.selector-modo {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   gap: 1rem;
+   margin: 1.8rem auto 1.2rem;
+   flex-wrap: wrap;
+}
+
+.btn-modo {
+   font-size: 1.25rem;
+   padding: .75rem 2.2rem;
+   transition: all .2s ease;
+   background: var(--panel);
+   border: 2px solid var(--borde);
+   color: var(--texto);
+   box-shadow: 0 4px 14px rgba(18, 32, 46, .08);
+   cursor: pointer;
+}
+
+.btn-modo:hover {
+   transform: translateY(-2px);
+   box-shadow: 0 6px 18px rgba(18, 32, 46, .14);
+}
+
+.btn-modo.activo {
+   background: var(--acento);
+   color: #1a1a1a;
+   border-color: var(--acento-borde);
+   box-shadow: 0 0 0 3px rgba(255, 207, 51, .35), 0 6px 20px rgba(201, 151, 0, .35);
+   transform: translateY(-1px);
+}
+
+/* En modo Knockout Tour los pines del mapa ya no son clickables */
+.mapa.modo-knockout .pin {
+   pointer-events: none !important;
+   cursor: default !important;
+}
+
+.mapa:not(.modo-knockout) .pin {
+   pointer-events: auto !important;
+   cursor: pointer !important;
+}
+
+.mapa.rally-hovering .pin {
+   opacity: .32;
+   filter: grayscale(20%);
+   transition: opacity .25s ease, transform .25s ease, filter .25s ease;
+}
+
+.mapa.rally-hovering .pin.pin-rally-activo {
+   opacity: 1;
+   filter: drop-shadow(0 0 10px #ffcf33) drop-shadow(0 0 18px rgba(255, 170, 0, .7));
+   transform: translate(-50%, -50%) scale(1.28);
+   z-index: 12;
+   animation: pulsoPin 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulsoPin {
+   0% {
+      transform: translate(-50%, -50%) scale(1.22);
+   }
+
+   100% {
+      transform: translate(-50%, -50%) scale(1.32);
+   }
+}
+
+/* --- CONEXIONES SVG DEL RALLY EN EL MAPA --- */
+.mapa-conexiones {
+   position: absolute;
+   inset: 0;
+   width: 100%;
+   height: 100%;
+   pointer-events: none;
+   z-index: 4;
+}
+
+.rally-path-sombra {
+   fill: none;
+   stroke: rgba(10, 20, 30, .85);
+   stroke-width: 2.2;
+   stroke-linecap: round;
+   stroke-linejoin: round;
+}
+
+.rally-path-glow {
+   fill: none;
+   stroke: #ff9900;
+   stroke-width: 1.4;
+   stroke-linecap: round;
+   stroke-linejoin: round;
+   opacity: .92;
+   filter: drop-shadow(0 0 3px #ffbb00);
+}
+
+.rally-path-carrera {
+   fill: none;
+   stroke: #fff7b2;
+   stroke-width: .8;
+   stroke-linecap: round;
+   stroke-linejoin: round;
+   stroke-dasharray: 2 1.2;
+   animation: carreraDash .8s linear infinite;
+}
+
+@keyframes carreraDash {
+   to {
+      stroke-dashoffset: -3.2;
+   }
+}
+
+.rally-waypoint {
+   pointer-events: none;
+   animation: waypointEntra .3s ease-out both;
+}
+
+@keyframes waypointEntra {
+   from {
+      opacity: 0;
+      transform: scale(.6);
+   }
+
+   to {
+      opacity: 1;
+   }
+}
+
+.waypoint-sombra {
+   fill: #0a141e;
+   opacity: .85;
+}
+
+.waypoint-fondo {
+   fill: #ffcf33;
+   stroke: #fff;
+   stroke-width: .3;
+}
+
+.waypoint-num {
+   font-family: "Racers Delight", "Trebuchet MS", sans-serif;
+   font-size: 1.5px;
+   fill: #1a1a1a;
+   font-weight: 700;
+}
+
+/* --- PANEL SELECTOR DE RALLYS --- */
+.panel-rallys {
+   margin: 1.5rem 0 3rem;
+   background: var(--panel);
+   border: 2px solid var(--borde);
+   border-radius: var(--r);
+   padding: 1.5rem 1.2rem;
+   box-shadow: 0 10px 30px rgba(18, 32, 46, .08);
+   animation: panelEntra .28s ease-out both;
+}
+
+@keyframes panelEntra {
+   from {
+      opacity: 0;
+      transform: translateY(10px);
+   }
+
+   to {
+      opacity: 1;
+      transform: translateY(0);
+   }
+}
+
+.rallys-cabecera {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   margin-bottom: 1.2rem;
+   padding-bottom: .6rem;
+   border-bottom: 1px solid var(--borde);
+}
+
+.rallys-titulo {
+   font-size: 1.6rem;
+   color: var(--texto);
+}
+
+.rallys-paginacion-indicador {
+   font-family: "Racers Delight", sans-serif;
+   font-size: 1.1rem;
+   color: var(--suave);
+   background: #f0f4f8;
+   padding: .3rem .8rem;
+   border-radius: 999px;
+   border: 1px solid var(--borde);
+}
+
+.rallys-carrusel-contenedor {
+   display: flex;
+   align-items: center;
+   gap: .8rem;
+   position: relative;
+}
+
+.btn-carrusel {
+   flex: 0 0 auto;
+   width: 2.8rem;
+   height: 2.8rem;
+   border-radius: 50%;
+   border: 2px solid var(--borde);
+   background: var(--panel);
+   color: var(--texto);
+   font-size: 1.1rem;
+   display: grid;
+   place-items: center;
+   cursor: pointer;
+   transition: all .2s ease;
+   box-shadow: 0 2px 8px rgba(18, 32, 46, .1);
+}
+
+.btn-carrusel:hover:not(:disabled) {
+   background: var(--acento);
+   border-color: var(--acento-borde);
+   transform: scale(1.1);
+}
+
+.btn-carrusel:disabled {
+   opacity: .3;
+   cursor: not-allowed;
+}
+
+.rallys-viewport {
+   flex: 1;
+   min-width: 0;
+   overflow: hidden;
+   position: relative;
+}
+
+.rallys-pagina {
+   display: none;
+   grid-template-columns: repeat(4, 1fr);
+   gap: 1rem;
+   animation: paginaEntra .25s ease-out;
+}
+
+.rallys-pagina.pagina-activa {
+   display: grid;
+}
+
+@keyframes paginaEntra {
+   from {
+      opacity: 0;
+      transform: translateX(12px);
+   }
+
+   to {
+      opacity: 1;
+      transform: translateX(0);
+   }
+}
+
+.rally-card {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   text-align: center;
+   padding: 1rem .6rem .8rem;
+   border-radius: var(--r);
+   background: #fdfefe;
+   border: 2px solid var(--borde);
+   text-decoration: none;
+   transition: all .22s ease;
+   position: relative;
+   overflow: hidden;
+}
+
+.rally-card.habilitado {
+   background: linear-gradient(180deg, #fff 0%, #fffbe6 100%);
+   border-color: #ffd000;
+   box-shadow: 0 4px 14px rgba(255, 207, 51, .2);
+   cursor: pointer;
+}
+
+.rally-card.habilitado:hover {
+   transform: translateY(-4px) scale(1.04);
+   border-color: #ffaa00;
+   box-shadow: 0 8px 24px rgba(255, 170, 0, .4), 0 0 12px rgba(255, 207, 51, .5);
+}
+
+.rally-card.deshabilitado {
+   opacity: .65;
+   cursor: not-allowed;
+   filter: grayscale(15%);
+}
+
+.rally-card-icono-wrap {
+   width: 72px;
+   height: 72px;
+   margin-bottom: .5rem;
+   display: grid;
+   place-items: center;
+   position: relative;
+}
+
+.rally-card-icono {
+   width: 100%;
+   height: 100%;
+   object-fit: contain;
+   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .15));
+   transition: transform .2s ease;
+}
+
+.rally-card.habilitado:hover .rally-card-icono {
+   transform: scale(1.1);
+}
+
+.rally-card-nombre {
+   font-family: "Racers Delight", sans-serif;
+   font-size: 1.05rem;
+   color: var(--texto);
+   line-height: 1.2;
+}
+
+.rally-card-sub {
+   font-size: .78rem;
+   color: var(--suave);
+   margin-top: .2rem;
+}
+
+.badge-proximamente {
+   display: inline-block;
+   margin-top: .4rem;
+   font-size: .68rem;
+   padding: .2rem .5rem;
+   border-radius: 999px;
+   background: #e6edf4;
+   color: var(--suave);
+   font-weight: 600;
+}
+
+/* --- ESTILOS DE LA PÁGINA DEL RALLY (/rally/[id]) --- */
+.cabecera-rally {
+   align-items: center;
+   gap: 1.5rem;
+}
+
+.icono-rally-cabecera {
+   width: 120px;
+   height: 120px;
+   object-fit: contain;
+   filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .2));
+}
+
+.subtitulo-rally {
+   font-family: "Racers Delight", sans-serif;
+   font-size: 1.15rem;
+   color: var(--suave);
+   margin-top: .2rem;
+   display: block;
+}
+
+.seccion-etapas {
+   margin: 2rem 0;
+}
+
+.titulo-seccion {
+   font-size: 1.6rem;
+   margin-bottom: 1.2rem;
+   color: var(--texto);
+}
+
+.etapas-grid {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+   gap: 1.2rem;
+}
+
+.etapa-card {
+   position: relative;
+   background: var(--panel);
+   border: 2px solid var(--borde);
+   border-radius: var(--r);
+   overflow: hidden;
+   box-shadow: 0 4px 14px rgba(18, 32, 46, .08);
+   transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.etapa-card:hover {
+   transform: translateY(-3px);
+   border-color: var(--acento-borde);
+   box-shadow: 0 8px 20px rgba(18, 32, 46, .15);
+}
+
+.etapa-badge {
+   position: absolute;
+   top: .6rem;
+   left: .6rem;
+   background: rgba(18, 32, 46, .88);
+   color: var(--acento);
+   font-family: "Racers Delight", sans-serif;
+   font-size: .85rem;
+   padding: .25rem .65rem;
+   border-radius: 999px;
+   z-index: 2;
+   box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+}
+
+.etapa-link {
+   display: block;
+   text-decoration: none;
+   color: inherit;
+}
+
+.etapa-img {
+   width: 100%;
+   aspect-ratio: 444 / 317;
+   object-fit: cover;
+   display: block;
+}
+
+.etapa-info {
+   display: flex;
+   align-items: center;
+   gap: .8rem;
+   padding: .8rem 1rem;
+   background: var(--panel);
+}
+
+.etapa-icono {
+   width: 2.2rem;
+   height: 2.2rem;
+   object-fit: contain;
+   flex-shrink: 0;
+}
+
+.etapa-nombre {
+   font-family: "Racers Delight", sans-serif;
+   font-size: 1.15rem;
+   color: var(--texto);
+}
+
+@media(max-width:800px) {
+   .rallys-pagina {
+      grid-template-columns: repeat(2, 1fr);
+   }
+}
+
+@media(max-width:500px) {
+   .rallys-pagina {
+      grid-template-columns: repeat(2, 1fr);
+      gap: .6rem;
+   }
+
+   .rally-card {
+      padding: .6rem .4rem;
+   }
+
+   .rally-card-icono-wrap {
+      width: 56px;
+      height: 56px;
+   }
+
+   .rally-card-nombre {
+      font-size: .9rem;
+   }
+
+   .btn-modo {
+      font-size: 1.05rem;
+      padding: .6rem 1.4rem;
    }
 }
 

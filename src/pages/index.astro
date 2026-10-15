@@ -1,6 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 import { enElMapa, imgDe, rutasDesde, pistas } from "../data/pistas";
+import { getRallysParaMapa, rallys } from "../data/rallys";
 
 // Lo único que el menú necesita saber de cada pista. Va en el HTML como un
 // bloque de datos plano, y el script del final lo lee al hacer clic.
@@ -38,6 +39,8 @@ const paraMenu = Object.fromEntries(
     ];
   }),
 );
+
+const rallysMapa = getRallysParaMapa();
 ---
 
 <Base>
@@ -50,8 +53,30 @@ const paraMenu = Object.fromEntries(
   </h1>
 
   <!-- MAPA: cada pista es un pin. Ajustá la posición con posMapa {x,y} (%) en src/data/pistas.ts -->
-  <div class="mapa">
+  <div class="mapa" id="contenedor-mapa">
     <img src="/img/mapa-mundo.webp" alt="Mapa de Mario Kart World" />
+
+    <!-- Capa SVG para dibujar las conexiones dinámicas de los rallys -->
+    <svg
+      id="svg-conexiones"
+      class="mapa-conexiones"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <defs>
+        <filter id="glow-rally" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="0.8" result="blur"></feGaussianBlur>
+          <feMerge>
+            <feMergeNode in="blur"></feMergeNode>
+            <feMergeNode in="SourceGraphic"></feMergeNode>
+          </feMerge>
+        </filter>
+      </defs>
+      <g id="capa-lineas"></g>
+      <g id="capa-waypoints"></g>
+    </svg>
+
     {
       enElMapa().map((p) => (
         <button
@@ -66,11 +91,121 @@ const paraMenu = Object.fromEntries(
     }
   </div>
 
+  <!-- SELECTOR DE MODO: Carreras vs Knockout Tour -->
+  <div class="selector-modo" role="tablist" aria-label="Modo de juego">
+    <button
+      type="button"
+      id="btn-modo-carreras"
+      class="btn btn-modo activo"
+      role="tab"
+      aria-selected="true"
+    >
+      Carreras
+    </button>
+    <button
+      type="button"
+      id="btn-modo-knockout"
+      class="btn btn-modo"
+      role="tab"
+      aria-selected="false"
+    >
+      Knockout Tour
+    </button>
+  </div>
+
+  <!-- SELECTOR DE RALLYS: Se muestra en modo Knockout Tour -->
+  <section
+    id="panel-knockout"
+    class="panel-rallys oculto"
+    aria-label="Selector de Rallys"
+  >
+    <div class="rallys-cabecera">
+      <h2 class="rallys-titulo">Elige un Rally</h2>
+      <div class="rallys-paginacion-indicador">
+        <span id="rallys-pagina-texto">1 / 2</span>
+      </div>
+    </div>
+
+    <div class="rallys-carrusel-contenedor">
+      <button
+        type="button"
+        id="btn-rally-prev"
+        class="btn-carrusel btn-carrusel-izq"
+        aria-label="Ver rallys anteriores"
+        disabled
+      >
+        <span aria-hidden="true">&#9664;</span>
+      </button>
+
+      <div class="rallys-viewport">
+        <!-- Página 1: Primeros 8 rallys -->
+        <div class="rallys-pagina pagina-activa" data-pagina="1">
+          {
+            rallys.slice(0, 8).map((r) => (
+              <a
+                href={r.habilitado ? `/rally/${r.id}` : undefined}
+                class={`rally-card ${r.habilitado ? "habilitado" : "deshabilitado"}`}
+                data-rally={r.id}
+                aria-disabled={!r.habilitado}
+              >
+                <div class="rally-card-icono-wrap">
+                  <img src={r.icono} alt="" class="rally-card-icono" />
+                </div>
+                <span class="rally-card-nombre">{r.nombre}</span>
+                {!r.habilitado && (
+                  <span class="badge-proximamente">Próximamente</span>
+                )}
+              </a>
+            ))
+          }
+        </div>
+
+        <!-- Página 2: Los otros 4 rallys restantes -->
+        <div class="rallys-pagina" data-pagina="2">
+          {
+            rallys.slice(8, 12).map((r) => (
+              <a
+                href={r.habilitado ? `/rally/${r.id}` : undefined}
+                class={`rally-card ${r.habilitado ? "habilitado" : "deshabilitado"}`}
+                data-rally={r.id}
+                aria-disabled={!r.habilitado}
+              >
+                <div class="rally-card-icono-wrap">
+                  <img src={r.icono} alt="" class="rally-card-icono" />
+                </div>
+                <span class="rally-card-nombre">{r.nombre}</span>
+                {!r.habilitado && (
+                  <span class="badge-proximamente">Próximamente</span>
+                )}
+              </a>
+            ))
+          }
+        </div>
+      </div>
+
+      <button
+        type="button"
+        id="btn-rally-next"
+        class="btn-carrusel btn-carrusel-der"
+        aria-label="Ver siguientes 4 rallys"
+      >
+        <span aria-hidden="true">&#9654;</span>
+      </button>
+    </div>
+  </section>
+
   <script
     type="application/json"
     id="datos"
     is:inline
     set:html={JSON.stringify(paraMenu)}
+  />
+
+  <script
+    type="application/json"
+    id="datos-rallys"
+    is:inline
+    set:html={JSON.stringify(rallysMapa)}
   />
 
   <!-- MENÚ DE PISTA: un solo diálogo para las 30 pistas. Las rutas hacia otras
@@ -102,16 +237,165 @@ const paraMenu = Object.fromEntries(
       rutasPendientes: number;
     };
 
+    type RallyParaMapa = {
+      id: string;
+      nombre: string;
+      icono: string;
+      habilitado: boolean;
+      href: string;
+      pistas: {
+        id: string;
+        nombre: string;
+        x: number;
+        y: number;
+        ronda: number;
+      }[];
+    };
+
     const datos: Record<string, DatosPista> = JSON.parse(
       document.getElementById("datos")!.textContent!,
     );
+    const rallysLista: RallyParaMapa[] = JSON.parse(
+      document.getElementById("datos-rallys")!.textContent!,
+    );
+    const rallysData = Object.fromEntries(rallysLista.map((r) => [r.id, r]));
+
     const dlg = document.getElementById("menu") as HTMLDialogElement;
     const cards = document.getElementById("cards")!;
     const lista = dlg.querySelector("ul")!;
 
-    // `n` imágenes de la fila actual: 1 = la card de la pista, 3 = A → flecha → B.
-    // `going` marca la del medio para que el CSS no le imponga el recorte 444x317.
-    const pintarCards = (urls: string[], alt: string) => {
+    const contenedorMapa = document.getElementById("contenedor-mapa")!;
+    const capaLineas = document.getElementById("capa-lineas")!;
+    const capaWaypoints = document.getElementById("capa-waypoints")!;
+    const pines = document.querySelectorAll<HTMLElement>(".pin");
+
+    const btnModoCarreras = document.getElementById("btn-modo-carreras")!;
+    const btnModoKnockout = document.getElementById("btn-modo-knockout")!;
+    const panelKnockout = document.getElementById("panel-knockout")!;
+
+    const paginas = document.querySelectorAll<HTMLElement>(".rallys-pagina");
+    const btnPrev = document.getElementById("btn-rally-prev") as HTMLButtonElement;
+    const btnNext = document.getElementById("btn-rally-next") as HTMLButtonElement;
+    const indicadorTexto = document.getElementById("rallys-pagina-texto")!;
+
+    let modoActual: "carreras" | "knockout" = "carreras";
+
+    function limpiarConexiones() {
+      contenedorMapa.classList.remove("rally-hovering");
+      pines.forEach((pin) => pin.classList.remove("pin-rally-activo"));
+      capaLineas.replaceChildren();
+      capaWaypoints.replaceChildren();
+    }
+
+    function setModo(nuevoModo: "carreras" | "knockout") {
+      modoActual = nuevoModo;
+      const esKnockout = nuevoModo === "knockout";
+
+      try {
+        sessionStorage.setItem("mkw_modo", nuevoModo);
+      } catch (e) {}
+
+      btnModoCarreras.classList.toggle("activo", !esKnockout);
+      btnModoCarreras.setAttribute("aria-selected", String(!esKnockout));
+      btnModoKnockout.classList.toggle("activo", esKnockout);
+      btnModoKnockout.setAttribute("aria-selected", String(esKnockout));
+
+      panelKnockout.classList.toggle("oculto", !esKnockout);
+      contenedorMapa.classList.toggle("modo-knockout", esKnockout);
+
+      limpiarConexiones();
+
+      if (window.location.search.includes("modo=")) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("modo");
+        window.history.replaceState({}, "", url.pathname + (url.search ? url.search : ""));
+      }
+    }
+
+    function irAPagina(num: number) {
+      paginas.forEach((p) => {
+        p.classList.toggle("pagina-activa", p.dataset.pagina === String(num));
+      });
+      if (indicadorTexto) indicadorTexto.textContent = `${num} / 2`;
+      if (btnPrev) btnPrev.disabled = num === 1;
+      if (btnNext) btnNext.disabled = num === 2;
+    }
+
+    function dibujarConexiones(rallyId: string) {
+      const r = rallysData[rallyId];
+      if (!r || !r.pistas || r.pistas.length === 0) return;
+
+      contenedorMapa.classList.add("rally-hovering");
+
+      const idsRally = new Set(r.pistas.map((p) => p.id));
+      pines.forEach((pin) => {
+        const pertenece = idsRally.has(pin.dataset.pista!);
+        pin.classList.toggle("pin-rally-activo", pertenece);
+      });
+
+      const d = r.pistas
+        .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`)
+        .join(" ");
+
+      const pathSombra = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "path",
+      );
+      pathSombra.setAttribute("d", d);
+      pathSombra.setAttribute("class", "rally-path-sombra");
+
+      const pathGlow = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "path",
+      );
+      pathGlow.setAttribute("d", d);
+      pathGlow.setAttribute("class", "rally-path-glow");
+
+      const pathCarrera = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "path",
+      );
+      pathCarrera.setAttribute("d", d);
+      pathCarrera.setAttribute("class", "rally-path-carrera");
+
+      capaLineas.replaceChildren(pathSombra, pathGlow, pathCarrera);
+
+      const waypoints = r.pistas.map((p) => {
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute("class", "rally-waypoint");
+        g.setAttribute("transform", `translate(${p.x}, ${p.y})`);
+
+        const circSombra = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "circle",
+        );
+        circSombra.setAttribute("r", "2.1");
+        circSombra.setAttribute("class", "waypoint-sombra");
+
+        const circFondo = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "circle",
+        );
+        circFondo.setAttribute("r", "1.7");
+        circFondo.setAttribute("class", "waypoint-fondo");
+
+        const texto = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "text",
+        );
+        texto.setAttribute("text-anchor", "middle");
+        texto.setAttribute("dominant-baseline", "central");
+        texto.setAttribute("class", "waypoint-num");
+        texto.textContent = String(p.ronda);
+
+        g.append(circSombra, circFondo, texto);
+        return g;
+      });
+
+      capaWaypoints.replaceChildren(...waypoints);
+    }
+
+    function pintarCards(urls: string[], alt: string) {
       cards.dataset.n = String(urls.length);
       cards.replaceChildren(
         ...urls.map((u) => {
@@ -122,15 +406,17 @@ const paraMenu = Object.fromEntries(
           return img;
         }),
       );
-    };
+    }
 
-    const opcion = (
+    const SIN_RUTA = "Ruta hacia otra pista, próximamente";
+
+    function opcion(
       texto: string,
       href?: string,
       cardsDeEsta: string[] = [],
       prefijo = "",
       clasePrefijo = "prefijo",
-    ) => {
+    ) {
       const li = document.createElement("li");
       const el = document.createElement(href ? "a" : "span");
       el.className = "opcion";
@@ -143,9 +429,6 @@ const paraMenu = Object.fromEntries(
         el.append(p);
       }
       el.append(document.createTextNode(texto));
-      // mouseenter y focus: el teclado tiene que ver el mismo cambio que el mouse.
-      // Sin cards no hay nada que pintar. Sin este guard un placeholder borra la
-      // card de arriba: data-n=0 no tiene regla y el area se colapsa.
       if (cardsDeEsta.length) {
         el.addEventListener("mouseenter", () =>
           pintarCards(cardsDeEsta, texto),
@@ -154,15 +437,14 @@ const paraMenu = Object.fromEntries(
       }
       li.append(el);
       lista.append(li);
-    };
+    }
 
-    // Un solo lugar para el texto de "todavía no está": si las pistas que no tienen
-    // ruta y las rutas pendientes usaran dos strings distintos, el menú dejaría
-    // de ser uniforme.
-    const SIN_RUTA = "Ruta hacia otra pista, próximamente";
+    function abrir(id: string) {
+      if (modoActual === "knockout") return;
 
-    const abrir = (id: string) => {
       const t = datos[id];
+      if (!t) return;
+
       pintarCards([t.card], t.nombre);
       lista.replaceChildren();
 
@@ -192,18 +474,54 @@ const paraMenu = Object.fromEntries(
         }
       }
 
+      if (dlg.open) dlg.close();
       dlg.showModal();
-    };
+    }
 
-    document
-      .querySelectorAll<HTMLElement>(".pin")
-      .forEach((p) =>
-        p.addEventListener("click", () => abrir(p.dataset.pista!)),
-      );
+    // --- EVENT LISTENERS ---
+    btnModoCarreras.addEventListener("click", () => setModo("carreras"));
+    btnModoKnockout.addEventListener("click", () => setModo("knockout"));
+
+    if (btnPrev && btnNext) {
+      btnPrev.addEventListener("click", () => irAPagina(1));
+      btnNext.addEventListener("click", () => irAPagina(2));
+    }
+
+    document.querySelectorAll<HTMLElement>(".rally-card").forEach((card) => {
+      const rallyId = card.dataset.rally!;
+      card.addEventListener("mouseenter", () => dibujarConexiones(rallyId));
+      card.addEventListener("mouseleave", () => limpiarConexiones());
+      card.addEventListener("focus", () => dibujarConexiones(rallyId));
+      card.addEventListener("blur", () => limpiarConexiones());
+    });
+
+    pines.forEach((p) =>
+      p.addEventListener("click", () => abrir(p.dataset.pista!)),
+    );
 
     dlg.addEventListener("click", (e) => {
       if (e.target === dlg) dlg.close();
     });
     dlg.querySelector("button")!.addEventListener("click", () => dlg.close());
+
+    // --- INICIALIZACIÓN DE ESTADO ---
+    const params = new URLSearchParams(window.location.search);
+    const urlPideKnockout = params.get("modo") === "knockout";
+    if (params.has("modo")) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("modo");
+      window.history.replaceState({}, "", url.pathname + (url.search ? url.search : ""));
+    }
+
+    let modoInicial: "carreras" | "knockout" = "carreras";
+    try {
+      if (urlPideKnockout || sessionStorage.getItem("mkw_modo") === "knockout") {
+        modoInicial = "knockout";
+      }
+    } catch (e) {}
+
+    if (modoInicial === "knockout") {
+      setModo("knockout");
+    }
   </script>
 </Base>

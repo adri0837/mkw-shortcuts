@@ -1,0 +1,165 @@
+---
+import Base from "../../layouts/Base.astro";
+import { rallys, getPistasDeRally, type Rally } from "../../data/rallys";
+import { imgDe, CLIPS_BASE } from "../../data/pistas";
+
+export function getStaticPaths() {
+  return rallys.map((r) => ({ params: { id: r.id }, props: { r } }));
+}
+
+const { r } = Astro.props as { r: Rally };
+const etapas = getPistasDeRally(r);
+const atajos = r.atajos ?? [];
+---
+
+<Base titulo={`${r.nombre} - Mario Kart World`}>
+  <a class="volver" href="/" id="btn-volver-mapa">← Volver al mapa</a>
+
+  <header class="cabecera cabecera-rally">
+    <img class="icono-rally-cabecera" src={r.icono} alt="" />
+    <div>
+      <h1>{r.nombre}</h1>
+      <span class="subtitulo-rally">Knockout Tour</span>
+    </div>
+  </header>
+
+  {
+    r.estrategia && (
+      <>
+        <div class="bloque-estrategia">
+          <h2 class="titulo-estrategia">
+            Estrategia de Rally
+            <button class="ayuda" aria-label="Qué es cada perfil" />
+          </h2>
+          <div class="roles">
+            <p>
+              <strong>Runner:</strong> Mejor posición de inicio, primer lugar y
+              correr.
+            </p>
+            <p>
+              <strong>Shroomer:</strong> Mejor iniciar en posiciones bajas o
+              medias, conseguir champiñones, tomar atajos y correr.
+            </p>
+            <p>
+              <strong>Drafter:</strong> Mejor conseguir rebufos al iniciar la
+              carrera, y entonces correr.
+            </p>
+            <p>
+              <strong>Bagger:</strong> Mejor quedarse en posiciones bajas y usar
+              tus objetos para remontar al final.
+            </p>
+          </div>
+        </div>
+        <p class="estrategia">{r.estrategia}</p>
+      </>
+    )
+  }
+
+  <!-- CIRCUITO / RUTA DEL RALLY: Las 6 etapas en orden -->
+  {
+    etapas.length > 0 && (
+      <section class="seccion-etapas">
+        <h2 class="titulo-seccion">Circuitos del Rally ({etapas.length} Etapas)</h2>
+        <div class="etapas-grid">
+          {etapas.map((p, idx) => (
+            <article class="etapa-card">
+              <div class="etapa-badge">Ronda {idx + 1}</div>
+              <a href={`/pistas/${p.id}`} class="etapa-link">
+                <img class="etapa-img" src={imgDe(p, "card")} alt={p.nombre} />
+                <div class="etapa-info">
+                  <img class="etapa-icono" src={imgDe(p, "icono")} alt="" />
+                  <span class="etapa-nombre">{p.nombre}</span>
+                </div>
+              </a>
+            </article>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    atajos.length > 0 && (
+      <>
+        <div class="acciones">
+          <button class="btn" id="btn-atajo" aria-pressed="false">
+            Atajos del Rally
+          </button>
+          <div id="mini" class="mini oculto">
+            {atajos.map((c) => (
+              <button class="btn" data-cat={c.id} aria-pressed="false">
+                {c.icono && <img src={`/img/items/${c.icono}`} alt="" />}
+                {c.nombre}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {atajos.map((c) => (
+          <section class="lista oculto" id={`lista-${c.id}`}>
+            {c.atajos.map((a) => (
+              <article class="atajo">
+                {a.clip ? (
+                  <video
+                    class="clip"
+                    src={`${CLIPS_BASE}/${a.clip}`}
+                    poster={`${CLIPS_BASE}/${a.clip.replace(/\.mp4$/, ".jpg")}`}
+                    controls
+                    preload="metadata"
+                  />
+                ) : (
+                  <div class="clip">Clip pendiente</div>
+                )}
+                <div>
+                  <h3>{a.titulo}</h3>
+                  <p>{a.descripcion}</p>
+                </div>
+              </article>
+            ))}
+          </section>
+        ))}
+      </>
+    )
+  }
+
+  <script>
+    const btnAtajo = document.getElementById("btn-atajo");
+    const mini = document.getElementById("mini");
+    const botonesCat = mini ? mini.querySelectorAll<HTMLButtonElement>("button[data-cat]") : [];
+    const listas = document.querySelectorAll<HTMLElement>(".lista");
+
+    const alternar = (btn: HTMLElement, forzar?: boolean) => {
+      const activo = forzar ?? btn.getAttribute("aria-pressed") !== "true";
+      btn.setAttribute("aria-pressed", String(activo));
+      return activo;
+    };
+
+    if (btnAtajo && mini) {
+      btnAtajo.addEventListener("click", () => {
+        const abierto = alternar(btnAtajo);
+        mini.classList.toggle("oculto", !abierto);
+        if (!abierto) {
+          listas.forEach((l) => l.classList.add("oculto"));
+          botonesCat.forEach((b) => b.setAttribute("aria-pressed", "false"));
+        }
+      });
+
+      botonesCat.forEach((b) => {
+        b.addEventListener("click", () => {
+          const cat = b.dataset.cat;
+          const activa = alternar(b);
+          botonesCat.forEach((otro) => {
+            if (otro !== b) otro.setAttribute("aria-pressed", "false");
+          });
+          listas.forEach((l) =>
+            l.classList.toggle("oculto", l.id !== `lista-${cat}` || !activa)
+          );
+        });
+      });
+    }
+
+    document.getElementById("btn-volver-mapa")?.addEventListener("click", () => {
+      sessionStorage.setItem("mkw_modo", "knockout");
+    });
+  </script>
+</Base>
