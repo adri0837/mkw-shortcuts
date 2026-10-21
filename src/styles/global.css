@@ -107,7 +107,7 @@ a {
    anula itálica y negrita, así que solo falta el color. Los cinco pasan 3:1
    sobre el blanco del degradado, que es lo que pide texto grande. */
 .letra-w {
-   color: #f6d608
+   color: #d8bc08
 }
 
 .letra-o {
@@ -161,6 +161,39 @@ a {
 
 .oculto {
    display: none !important
+}
+
+/* Animaciones de aparicion y desaparicion */
+.anim-entra {
+   animation: animEntra .24s cubic-bezier(0.16, 1, 0.3, 1) both
+}
+
+.anim-sale {
+   animation: animSale .18s ease-in both
+}
+
+@keyframes animEntra {
+   from {
+      opacity: 0;
+      transform: translateY(8px)
+   }
+
+   to {
+      opacity: 1;
+      transform: translateY(0)
+   }
+}
+
+@keyframes animSale {
+   from {
+      opacity: 1;
+      transform: translateY(0)
+   }
+
+   to {
+      opacity: 0;
+      transform: translateY(6px)
+   }
 }
 
 .mapa {
@@ -431,7 +464,9 @@ a.opcion:hover {
 
 .estrategia {
    max-width: 70ch;
-   color: var(--suave)
+   color: #000;
+   text-align: justify;
+   text-justify: inter-word
 }
 
 /* El "?" abre el glosario de perfiles por hover, no por click. El popup va
@@ -486,6 +521,46 @@ a.opcion:hover {
 .bloque-estrategia {
    position: relative;
    margin: 1.6rem 0 .8rem
+}
+
+/* El "?" de la extensión de bala: mismo círculo y mismo truco de hover que
+   el de Estrategia, pero anclado a .ayuda-bala (el envoltorio del botón,
+   porque un <button> dentro de otro <button> es HTML inválido).
+   top: calc(50% + .85rem) = borde inferior del círculo (1.7rem / 2) con el
+   círculo centrado en la fila: SIN hueco entre círculo y popup, si no al
+   bajar el mouse se cierra en el medio y parpadea.
+   flex: 1 le da al popup el ancho del resto de la fila de .acciones, así el
+   texto no se acota al ancho del botón. */
+.ayuda-bala {
+   position: relative;
+   flex: 1 1 auto;
+   display: flex;
+   align-items: center;
+   gap: .6rem
+}
+
+.ayuda-bala:has(.ayuda:is(:hover, :focus-visible)) .ayuda-panel,
+.ayuda-bala:has(.ayuda-panel:hover) .ayuda-panel {
+   display: block
+}
+
+.ayuda-bala:has(.ayuda:is(:hover, :focus-visible)) .ayuda::before,
+.ayuda-bala:has(.ayuda-panel:hover) .ayuda::before {
+   content: "¿"
+}
+
+.ayuda-panel {
+   position: absolute;
+   top: calc(50% + .85rem);
+   left: 0;
+   z-index: 9;
+   display: none;
+   width: min(70ch, 100%);
+   padding: .5rem;
+   border: 2px solid var(--borde);
+   border-radius: var(--r);
+   background: var(--panel);
+   box-shadow: 0 10px 28px rgba(18, 32, 46, .22)
 }
 
 /* Los dos popups (glosario de perfiles y menu de atajos) son el MISMO panel:
@@ -559,6 +634,12 @@ a.opcion:hover {
    border-top: 1px solid var(--borde)
 }
 
+.atajo p {
+   color: #000;
+   text-align: justify;
+   text-justify: inter-word
+}
+
 .clip {
    aspect-ratio: 16/9;
    width: 100%;
@@ -575,12 +656,42 @@ video.clip {
    background: #000
 }
 
+/* El panel va en fila: minimapa a la izquierda y la info de la bala al lado.
+   wrap para que en pantallas chicas se apilen. */
+#panel-bala {
+   display: flex;
+   gap: 2rem;
+   align-items: center;
+   flex-wrap: wrap
+}
+
 .minimapa {
    position: relative;
+   /* mete al ::before dentro del propio contexto: si no, con z-index:-1
+      se colaría detrás de los fondos de los hermanos anteriores. */
+   isolation: isolate;
    display: inline-block;
-   background: #f3f0e6;
-   border-radius: var(--r);
    padding: 1rem
+}
+
+/* El panel blanco va en un ::before con la misma máscara que .mapa>img:
+   los bordes se disuelven en el degradado de la página y deja de leerse
+   como un cuadrado encima. En ::before y no en .minimapa porque la máscara
+   bajaría a los hijos: el trazado y los botones de la bala son hermanos
+   pintados encima y quedan nítidos. */
+.minimapa::before {
+   content: '';
+   position: absolute;
+   inset: 0;
+   z-index: -1;
+   border-radius: var(--r);
+   background: var(--panel);
+   /* mismo truco que .mapa>img pero con el fundido más corto (7% en vez de 11%):
+      es un panel chico y el fade largo se comía demasiado del blanco. */
+   -webkit-mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent), linear-gradient(to bottom, transparent, #000 9%, #000 91%, transparent);
+   -webkit-mask-composite: source-in;
+   mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent), linear-gradient(to bottom, transparent, #000 9%, #000 91%, transparent);
+   mask-composite: intersect;
 }
 
 .minimapa img {
@@ -588,16 +699,62 @@ video.clip {
    width: min(320px, 80vw)
 }
 
+/* Botón sin círculo: solo el ícono, posicionado sobre el minimapa. */
 .bala {
    position: absolute;
-   width: 2rem;
-   height: 2rem;
+   width: 2.3rem;
+   height: 2.3rem;
    transform: translate(-50%, -50%);
    display: grid;
    place-items: center;
-   background: #1a1a1a;
-   border-radius: 50%;
+   padding: 0;
+   border: 0;
+   background: none;
+   cursor: pointer
+}
+
+/* Imagen a la izquierda y descripción a la derecha, misma fila. Centrado vertical con el minimapa. */
+.info-bala {
+   display: grid;
+   grid-template-columns: repeat(2, minmax(0, 1fr));
+   gap: 1.5rem;
+   align-items: center;
+   width: min(560px, 100%)
+}
+
+.info-bala p {
+   color: #000;
+   margin: 0;
+   line-height: 1.5;
+   text-align: justify;
+   text-justify: inter-word
+}
+
+.bala-clip {
+   position: relative;
    overflow: hidden
+}
+
+.bala-clip .bala-img {
+   position: absolute;
+   inset: 0;
+   width: 100%;
+   height: 100%;
+   object-fit: cover;
+   border-radius: inherit;
+   display: none
+}
+
+.bala-clip.cargada {
+   border-style: solid
+}
+
+.bala-clip.cargada .placeholder-texto {
+   display: none
+}
+
+.bala-clip.cargada .bala-img {
+   display: block
 }
 
 .bala img {
@@ -609,7 +766,8 @@ video.clip {
 @media(max-width:700px) {
 
    .menu,
-   .atajo {
+   .atajo,
+   .info-bala {
       grid-template-columns: 1fr
    }
 }

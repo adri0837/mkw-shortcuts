@@ -5,7 +5,11 @@
 //
 //   posMapa    -> el pin en el mapa del mundo (%, sobre /img/mapa-mundo.webp).
 //                 Sacá las coordenadas clickeando en la página /colocar.
-//   posBala    -> dónde cae la bala en el minimapa de la pista.
+//   posBala    -> las balas en el minimapa: una entrada por extensión ({x,y} en %).
+//                 img   -> nombre del .webp de la extensión en R2, igual que los
+//                          clips (si falta, queda el placeholder).
+//                 texto -> la descripción que aparece al lado del minimapa
+//                          al hacer click en el ícono de la bala.
 //   estrategia -> el texto de arriba de la página de la pista.
 //   atajos     -> los grupos de atajos. Los botones del menú se arman solos
 //                 desde acá, no hay que tocar ninguna página.
@@ -13,8 +17,10 @@
 // Las imágenes no se nombran: se sacan solas de public/img/pistas/<id>/ con los
 // nombres icono, card y minimapa.
 // Íconos de ítems: public/img/items/{mushroom,feather,bullet-bill}.webp
-// Clips: subilos a R2 con `node scripts/subir-clips.mjs "grabacion.mov=nombre.mp4"`
-// y poné acá SOLO el nombre del archivo. El prefijo lo agrega CLIPS_BASE al renderizar,
+// Clips y capturas de extensión de bala: subilos a R2 con
+// `node scripts/subir-clips.mjs "grabacion.mov=nombre.mp4"` o
+// `node scripts/subir-clips.mjs "captura.png=pista-bala-1.webp"` y poné acá SOLO
+// el nombre del archivo. El prefijo lo agrega CLIPS_BASE al renderizar,
 // así si algún día cambiás de dominio editás un solo lugar.
 
 import { existsSync } from 'node:fs';
@@ -45,7 +51,8 @@ export type Pista = {
   card?: string;
   minimapa?: string;
   posMapa?: { x: number; y: number };
-  posBala?: { x: number; y: number };
+  // Una entrada por extensión de bala: {x,y} en % sobre el minimapa + img/texto.
+  posBala?: { x: number; y: number; img?: string; texto?: string }[];
   estrategia?: string;
   atajos?: Categoria[];
   rutasPendientes?: number;
@@ -91,7 +98,7 @@ export const pistas: Pista[] = [
     id: 'acorn-heights',
     nombre: 'Aldea Arbórea',
     posMapa: { x: 50.2, y: 12.0 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -118,7 +125,7 @@ export const pistas: Pista[] = [
     id: 'airship-fortress',
     nombre: 'Fortaleza Aérea',
     posMapa: { x: 14.7, y: 31.6 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -145,7 +152,7 @@ export const pistas: Pista[] = [
     id: 'boo-cinema',
     nombre: 'Cine Boo',
     posMapa: { x: 63.2, y: 17.9 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     subpistas: ['ghost-valley-1', 'ghost-valley-2', 'ghost-valley-3'],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
@@ -173,7 +180,7 @@ export const pistas: Pista[] = [
     id: 'bowsers-castle',
     nombre: 'Castillo de Bowser',
     posMapa: { x: 26.9, y: 19.9 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -200,7 +207,7 @@ export const pistas: Pista[] = [
     id: 'cheep-cheep-falls',
     nombre: 'Cascadas Cheep Cheep',
     posMapa: { x: 62.1, y: 52.2 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -227,7 +234,7 @@ export const pistas: Pista[] = [
     id: 'choco-mountain',
     nombre: 'Monte Chocolate',
     posMapa: { x: 38.1, y: 51.4 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     subpistas: ['choco-island-1', 'choco-island-2'],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
@@ -255,7 +262,7 @@ export const pistas: Pista[] = [
     id: 'crown-city',
     nombre: 'Ciudad Corona',
     posMapa: { x: 37.3, y: 70.4 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -282,7 +289,7 @@ export const pistas: Pista[] = [
     id: 'dandelion-depths',
     nombre: 'Gruta Diente de León',
     posMapa: { x: 61.8, y: 37.0 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -309,7 +316,7 @@ export const pistas: Pista[] = [
     id: 'desert-hills',
     nombre: 'Desierto Sol-Sol',
     posMapa: { x: 11.9, y: 69.9 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -336,7 +343,7 @@ export const pistas: Pista[] = [
     id: 'dino-dino-jungle',
     nombre: 'Jungla Dino Dino',
     posMapa: { x: 64.4, y: 86.7 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -363,7 +370,7 @@ export const pistas: Pista[] = [
     id: 'dk-pass',
     nombre: 'DK Alpino',
     posMapa: { x: 73.5, y: 43.4 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -390,7 +397,7 @@ export const pistas: Pista[] = [
     id: 'dk-spaceport',
     nombre: 'Puerto Espacial DK',
     posMapa: { x: 38.9, y: 84.5 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -417,7 +424,7 @@ export const pistas: Pista[] = [
     id: 'dry-bones-burnout',
     nombre: 'Caverna Ósea',
     posMapa: { x: 37.6, y: 18.1 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -444,7 +451,7 @@ export const pistas: Pista[] = [
     id: 'faraway-oasis',
     nombre: 'Sabana Salpicante',
     posMapa: { x: 60.6, y: 68.7 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -471,7 +478,7 @@ export const pistas: Pista[] = [
     id: 'great-block-ruins',
     nombre: 'Templo del Bloque ?',
     posMapa: { x: 77.0, y: 80.7 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -498,7 +505,7 @@ export const pistas: Pista[] = [
     id: 'koopa-troopa-beach',
     nombre: 'Playa Koopa',
     posMapa: { x: 49.2, y: 80.2 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     subpistas: ['koopa-beach-1'],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
@@ -526,9 +533,9 @@ export const pistas: Pista[] = [
     id: 'mario-bros-circuit',
     nombre: 'Circuito Mario Bros.',
     posMapa: { x: 24.1, y: 60.1 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 28, y: 67, img: 'mario-bros-circuit-bala-1.webp', texto: 'Usar la bala antes o durante la sección del túnel, antes de empezar la curva del cañón. La bala te llevará por toda esa curva y te dejará antes del último set de objetos de la pista.' }],
     estrategia:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
+      'En esta pista, si se inicia en posiciones altas, es recomendable <strong>runnear</strong>, pues los dos atajos más importantes se pueden tomar con champiñones o plumas, objetos que se consiguen en posiciones entre 1 y 5 durante los primeros segundos de la carrera. Mientras tanto, si se empieza en posiciones bajas, se recomienda mantenerse en ellas para <strong>baggear</strong> por una bala sin quedarse muy atrás, remontar usando la bala en la extensión y utilizar objetos de velocidad en la sección final de la pista (la sección de la división de los dos caminos).',
     atajos: [
       {
         id: 'nisc',
@@ -536,8 +543,8 @@ export const pistas: Pista[] = [
         icono: '',
         atajos: [
           { titulo: 'NISC #1', clip: 'mario-bros-circuit-nisc-1.mp4', descripcion: 'En la secuencia inicial, te direccionas al segundo cartel verde de Luigi Tires, dirigiéndote a la letra "E" de la palabra "TIRES" mientras realizas un salto cargado con el turbo del Start Boost. Al estar muy cerca del cartel, sueltas el salto cargado, golpeando el cartel y elevándote en el aire. Ahí, rápidamente haces un Trick a la derecha para direccionarte y, sobre todo, tener un turbo al caer en el riel verde. Con esto, tomas una curva mucho más cerrada.' },
-          { titulo: 'NISC #2', clip: 'mario-bros-circuit-nisc-2.mp4', descripcion: 'Sed do eiusmod tempor incididunt ut labore et dolore.' },
-          { titulo: 'NISC #3', clip: 'mario-bros-circuit-nisc-3.mp4', descripcion: 'Sed do eiusmod tempor incididunt ut labore et dolore.' },
+          { titulo: 'NISC #2', clip: 'mario-bros-circuit-nisc-2.mp4', descripcion: 'En el segmento final del riel verde, realizar un Trick a la derecha y empezar un derrape. Cuando se tenga listo el miniturbo azul, soltarlo y dirigirte de manera diagonal al riel amarillo del borde. Justo antes de subirte al riel, realizar un Trick para que el riel te agarre con un turbo (La velocidad del miniturbo azul es necesaria para poder realizar el trick antes de subirte al riel amarillo). Posteriormente, realizar un Trick neutro al agarrar la moneda en el riel donde te acabas de subir y comenzar un salto cargado para poder saltar al otro riel amarillo del borde. Después, realizar un Trick a la izquierda justo antes de agarrar la moneda, esto para acortar un poco la curva del riel y, finalmente, realizar dos Tricks para salir, entrar y salir de los rieles con un poco más de turbo.' },
+          { titulo: 'NISC #3', clip: 'mario-bros-circuit-nisc-3.mp4', descripcion: 'Saliendo del riel verde que está a la izquierda de la meta, comenzar un salto cargado en el borde del pavimento y empezar a direccionarte a la izquierda, apuntando a la esquina derecha del cartel verde de "Luigi Tires". Al chocar con dicha parte haciendo un Trick a la izquierda, te eleva por el rebote, saltando por encima de las llantas para tomar el riel verde. (Este NISC puede llegar a ser un tanto inconsistente).' },
         ],
       },
       {
@@ -545,8 +552,8 @@ export const pistas: Pista[] = [
         nombre: 'Champiñón',
         icono: 'mushroom.webp',
         atajos: [
-          { titulo: 'Atajo con champiñón 1', clip: 'mario-bros-circuit-mushroom-1.mp4', descripcion: 'Ut enim ad minim veniam, quis nostrud exercitation.' },
-          { titulo: 'Atajo con champiñón 2', clip: 'mario-bros-circuit-mushroom-2.mp4', descripcion: 'Ut enim ad minim veniam, quis nostrud exercitation.' },
+          { titulo: 'Atajo con champiñón 1', clip: 'mario-bros-circuit-mushroom-1.mp4', descripcion: 'Súbete al riel amarillo y realiza un Trick a la derecha en la parte donde el riel se dirige a la derecha. Sin soltar el R, prepara un salto cargado dirigiéndote a la izquierda, al montículo de piedra, y antes de tocar la tierra (Offroad), usa tu champiñón y suelta el salto cargado. Con esto, rompes las cajas y llegas a la plataforma verde, la cual es la ruta más rápida en comparación con irse por el camino de abajo o la ruta del Glider.' },
+          { titulo: 'Atajo con champiñón 2', clip: 'mario-bros-circuit-mushroom-2.mp4', descripcion: 'Usa tu champiñón para cruzar a través de las llantas y, con eso, tomar el riel verde que permite tomar una curva mucho más cerrada.' },
         ],
       },
       {
@@ -554,8 +561,8 @@ export const pistas: Pista[] = [
         nombre: 'Pluma',
         icono: 'feather.webp',
         atajos: [
-          { titulo: 'Atajo con pluma 1', clip: 'mario-bros-circuit-feather-1.mp4', descripcion: 'Duis aute reprehenderit in voluptate.' },
-          { titulo: 'Atajo con pluma 2', clip: 'mario-bros-circuit-feather-2.mp4', descripcion: 'Duis aute reprehenderit in voluptate.' },
+          { titulo: 'Atajo con pluma 1', clip: 'mario-bros-circuit-feather-1.mp4', descripcion: 'Derrapa para alinearte a la plataforma verde y, cuando sueltes el miniturbo azul, usa la pluma para saltar a la plataforma y sobre las cajas.' },
+          { titulo: 'Atajo con pluma 2', clip: 'mario-bros-circuit-feather-2.mp4', descripcion: 'Usa la pluma para saltar sobre las llantas y, con eso, tomar el riel verde que permite tomar una curva mucho más cerrada.' },
         ],
       },
     ],
@@ -564,7 +571,7 @@ export const pistas: Pista[] = [
     id: 'mario-circuit',
     nombre: 'Circuito Mario',
     posMapa: { x: 50.4, y: 27.9 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     subpistas: ['mario-circuit-1', 'mario-circuit-2', 'mario-circuit-3'],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
@@ -592,7 +599,7 @@ export const pistas: Pista[] = [
     id: 'moo-moo-meadows',
     nombre: 'Pradera Mu-Mu',
     posMapa: { x: 50.0, y: 42.3 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -619,7 +626,7 @@ export const pistas: Pista[] = [
     id: 'peach-beach',
     nombre: 'Playa Peach',
     posMapa: { x: 85.2, y: 69.6 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -646,7 +653,7 @@ export const pistas: Pista[] = [
     id: 'peach-stadium',
     nombre: 'Estadio Peach',
     posMapa: { x: 50.1, y: 58.2 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -673,7 +680,7 @@ export const pistas: Pista[] = [
     id: 'rainbow-road',
     nombre: 'Senda Arco Iris',
     posMapa: { x: 49.9, y: 71.1 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -700,7 +707,7 @@ export const pistas: Pista[] = [
     id: 'salty-salty-speedway',
     nombre: 'Ciudad Salina',
     posMapa: { x: 74.3, y: 60.7 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -727,7 +734,7 @@ export const pistas: Pista[] = [
     id: 'shy-guy-bazaar',
     nombre: 'Bazar Shy Guy',
     posMapa: { x: 12.7, y: 49.3 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -754,7 +761,7 @@ export const pistas: Pista[] = [
     id: 'sky-high-sundae',
     nombre: 'Cielos Helados',
     posMapa: { x: 84.7, y: 35.3 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     subpistas: ['vanilla-lake-1'],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
@@ -782,7 +789,7 @@ export const pistas: Pista[] = [
     id: 'starview-peak',
     nombre: 'Mirador Estelar',
     posMapa: { x: 73.8, y: 24.9 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -809,7 +816,7 @@ export const pistas: Pista[] = [
     id: 'toads-factory',
     nombre: 'Fábrica de Toad',
     posMapa: { x: 39.2, y: 35.3 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -836,7 +843,7 @@ export const pistas: Pista[] = [
     id: 'wario-stadium',
     nombre: 'Estadio Wario',
     posMapa: { x: 26.3, y: 42.9 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -863,7 +870,7 @@ export const pistas: Pista[] = [
     id: 'warios-shipyard',
     nombre: 'Galeón de Wario',
     posMapa: { x: 85.3, y: 54.1 },
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -890,7 +897,10 @@ export const pistas: Pista[] = [
     id: 'whistlestop-summit',
     nombre: 'Cañón Ferroviario',
     posMapa: { x: 24.5, y: 79.3 },
-    posBala: { x: 50, y: 50 },
+    posBala: [
+      { x: 36, y: 50, img: '', texto: 'Primera extensión…' },
+      { x: 70, y: 60, img: '', texto: 'Segunda extensión…' },
+    ],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -916,7 +926,7 @@ export const pistas: Pista[] = [
   {
     id: 'choco-island-1',
     nombre: 'Isla Chocolate 1',
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -942,7 +952,7 @@ export const pistas: Pista[] = [
   {
     id: 'choco-island-2',
     nombre: 'Isla Chocolate 2',
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -968,7 +978,7 @@ export const pistas: Pista[] = [
   {
     id: 'mario-circuit-1',
     nombre: 'Circuito Mario 1',
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -994,7 +1004,7 @@ export const pistas: Pista[] = [
   {
     id: 'mario-circuit-2',
     nombre: 'Circuito Mario 2',
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -1020,7 +1030,7 @@ export const pistas: Pista[] = [
   {
     id: 'mario-circuit-3',
     nombre: 'Circuito Mario 3',
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -1046,7 +1056,7 @@ export const pistas: Pista[] = [
   {
     id: 'ghost-valley-1',
     nombre: 'Valle Fantasma 1',
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -1072,7 +1082,7 @@ export const pistas: Pista[] = [
   {
     id: 'ghost-valley-2',
     nombre: 'Valle Fantasma 2',
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -1098,7 +1108,7 @@ export const pistas: Pista[] = [
   {
     id: 'ghost-valley-3',
     nombre: 'Valle Fantasma 3',
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -1124,7 +1134,7 @@ export const pistas: Pista[] = [
   {
     id: 'vanilla-lake-1',
     nombre: 'Lago Vainilla 1',
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -1150,7 +1160,7 @@ export const pistas: Pista[] = [
   {
     id: 'koopa-beach-1',
     nombre: 'Playa Koopa 1',
-    posBala: { x: 50, y: 50 },
+    posBala: [{ x: 50, y: 50 }],
     estrategia: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
     atajos: [
       {
@@ -1191,6 +1201,14 @@ for (const p of pistas) {
     const archivo = p[cual] ?? IMAGENES[cual];
     const ruta = new URL(`../../public/img/pistas/${p.id}/${archivo}`, import.meta.url);
     if (!existsSync(ruta)) throw new Error(`Falta la imagen: public/img/pistas/${p.id}/${archivo}`);
+  }
+  // Extensiones de bala: viven en R2, así que acá solo se valida el nombre que
+  // genera el script. Un typo frena la build en vez de dejar un 404 en vivo.
+  for (const b of p.posBala ?? []) {
+    if (!b.img) continue;
+    if (!b.img.startsWith(`${p.id}-bala-`) || !b.img.endsWith('.webp')) {
+      throw new Error(`Extensión de bala mal nombrada: ${b.img} (esperado ${p.id}-bala-{n}.webp)`);
+    }
   }
 }
 

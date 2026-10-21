@@ -55,7 +55,7 @@ const atajos = r.atajos ?? [];
             </p>
           </div>
         </div>
-        <p class="estrategia">{r.estrategia}</p>
+        <p class="estrategia" set:html={r.estrategia} />
       </>
     )
   }
@@ -97,7 +97,7 @@ const atajos = r.atajos ?? [];
                 )}
                 <div>
                   <h3>{a.titulo}</h3>
-                  <p>{a.descripcion}</p>
+                  <p set:html={a.descripcion} />
                 </div>
               </article>
             ))}

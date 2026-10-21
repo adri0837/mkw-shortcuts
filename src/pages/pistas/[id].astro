@@ -6,7 +6,8 @@ export function getStaticPaths() {
 }
 const { p } = Astro.props;
 const atajos = p.atajos ?? [];
-const hayBala = p.posBala !== undefined;
+const balas = p.posBala ?? [];
+const hayBala = balas.length > 0;
 const copa = copaDe(p.id);
 ---
 
@@ -46,7 +47,7 @@ const copa = copaDe(p.id);
             </p>
           </div>
         </div>
-        <p class="estrategia">{p.estrategia}</p>
+        <p class="estrategia" set:html={p.estrategia} />
       </>
     )
   }
@@ -60,10 +61,19 @@ const copa = copaDe(p.id);
           </button>
         )}
         {hayBala && (
-          <button class="btn" id="btn-bala" aria-pressed="false">
-            <img src="/img/items/bullet-bill.webp" alt="" />
-            Extensión de bala
-          </button>
+          <div class="ayuda-bala">
+            <button class="btn" id="btn-bala" aria-pressed="false">
+              <img src="/img/items/bullet-bill.webp" alt="" />
+              Extensión de bala
+            </button>
+            <button class="ayuda" aria-label="Qué es la extensión de bala" />
+            <div class="ayuda-panel">
+              Una extensión de bala prolonga la duración del objeto al entrar
+              en zonas complejas de una pista, obligando a la bala a viajar
+              hasta un área a salvo, el efecto puede concluir si se pasan a 5
+              corredores en la bala.
+            </div>
+          </div>
         )}
         {/* El .mini va DENTRO de .acciones a proposito: es el ancla del popup, y
           un position:absolute solo toma como ancla un ancestro. Como hermano se
@@ -101,7 +111,7 @@ const copa = copaDe(p.id);
             )}
             <div>
               <h3>{a.titulo}</h3>
-              <p>{a.descripcion}</p>
+              <p set:html={a.descripcion} />
             </div>
           </article>
         ))}
@@ -109,19 +119,46 @@ const copa = copaDe(p.id);
     ))
   }
 
-  <!-- MINIMAPA CON LA BALA: ajustá posBala {x,y} (%) en src/data/pistas.ts -->
+  <!-- MINIMAPA CON LAS BALAS: posBala es un array en src/data/pistas.ts,
+       una entrada por bala ({x,y} en % + img en R2 / texto del panel). -->
   {
     hayBala && (
       <section id="panel-bala" class="oculto">
         <div class="minimapa">
           <img src={imgDe(p, "minimapa")} alt={`Minimapa de ${p.nombre}`} />
-          <span
-            class="bala"
-            style={`left:${p.posBala!.x}%;top:${p.posBala!.y}%`}
-          >
-            <img src="/img/items/bullet-bill.webp" alt="" />
-          </span>
+          {balas.map((b, i) => (
+            <button
+              type="button"
+              class="bala"
+              data-bala={i}
+              aria-expanded="false"
+              aria-controls={`info-bala-${i}`}
+              aria-label={`Extensión de bala ${i + 1}`}
+              style={`left:${b.x}%;top:${b.y}%`}
+            >
+              <img src="/img/items/bullet-bill-front.webp" alt="" />
+            </button>
+          ))}
         </div>
+        {balas.map((b, i) => (
+          <div id={`info-bala-${i}`} class="info-bala oculto">
+            {b.img ? (
+              <div class="clip bala-clip">
+                <span class="placeholder-texto">Imagen pendiente</span>
+                <img
+                  class="bala-img"
+                  src={`${CLIPS_BASE}/${b.img}`}
+                  alt={`Extensión de bala en ${p.nombre}`}
+                  onload="this.parentElement.classList.add('cargada')"
+                  onerror="this.parentElement.classList.remove('cargada')"
+                />
+              </div>
+            ) : (
+              <div class="clip">Imagen pendiente</div>
+            )}
+            <p set:html={b.texto ?? "Descripción pendiente."} />
+          </div>
+        ))}
       </section>
     )
   }
@@ -132,42 +169,126 @@ const copa = copaDe(p.id);
       btnBala = $("#btn-bala");
     const mini = $("#mini"),
       bala = $("#panel-bala");
+    const infoBalas = document.querySelectorAll<HTMLElement>(".info-bala");
+    const btnsBala = document.querySelectorAll<HTMLButtonElement>(".bala");
     const marcar = (el: Element, on: boolean) =>
       el.setAttribute("aria-pressed", String(on));
     const desmarcarCategorias = () =>
       document.querySelectorAll("[data-cat]").forEach((x) => marcar(x, false));
+
+    document.querySelectorAll<HTMLImageElement>(".bala-clip .bala-img").forEach((img) => {
+      if (img.complete && img.naturalWidth > 0) {
+        img.parentElement?.classList.add("cargada");
+      }
+    });
+
+    const TIEMPO_ANIM = 180;
+
+    const animarEntrada = (el: HTMLElement | null) => {
+      if (!el) return;
+      el.classList.remove("anim-sale", "oculto");
+      el.classList.remove("anim-entra");
+      void el.offsetWidth;
+      el.classList.add("anim-entra");
+    };
+
+    const animarSalida = (el: HTMLElement | null, alTerminar?: () => void) => {
+      if (!el || el.classList.contains("oculto")) {
+        alTerminar?.();
+        return;
+      }
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        el.classList.add("oculto");
+        el.classList.remove("anim-entra", "anim-sale");
+        alTerminar?.();
+        return;
+      }
+      el.classList.remove("anim-entra");
+      el.classList.add("anim-sale");
+      let terminado = false;
+      const fin = () => {
+        if (terminado) return;
+        terminado = true;
+        el.classList.add("oculto");
+        el.classList.remove("anim-sale");
+        alTerminar?.();
+      };
+      el.addEventListener("animationend", fin, { once: true });
+      setTimeout(fin, TIEMPO_ANIM + 50);
+    };
+
     const ocultarListas = () => {
-      document
-        .querySelectorAll(".lista")
-        .forEach((l) => l.classList.add("oculto"));
+      document.querySelectorAll<HTMLElement>(".lista:not(.oculto)").forEach((l) => {
+        animarSalida(l);
+      });
       desmarcarCategorias();
     };
 
     btnAtajo?.addEventListener("click", () => {
-      mini?.classList.toggle("oculto");
-      bala?.classList.add("oculto");
-      if (btnBala) marcar(btnBala, false);
-      const abierto = !mini?.classList.contains("oculto");
-      if (btnAtajo) marcar(btnAtajo, abierto);
-      if (!abierto) ocultarListas();
-    });
-    btnBala?.addEventListener("click", () => {
-      const abierto = bala?.classList.toggle("oculto") === false;
-      marcar(btnBala, abierto);
-      if (abierto) {
-        mini?.classList.add("oculto");
+      const abrir = mini?.classList.contains("oculto");
+      if (abrir) {
+        animarEntrada(mini);
+        marcar(btnAtajo, true);
+        if (bala && !bala.classList.contains("oculto")) {
+          animarSalida(bala);
+          if (btnBala) marcar(btnBala, false);
+        }
+      } else {
+        animarSalida(mini);
+        marcar(btnAtajo, false);
         ocultarListas();
-        if (btnAtajo) marcar(btnAtajo, false);
       }
     });
+
+    btnBala?.addEventListener("click", () => {
+      const abrir = bala?.classList.contains("oculto");
+      if (abrir) {
+        animarEntrada(bala);
+        marcar(btnBala, true);
+        animarSalida(mini);
+        ocultarListas();
+        if (btnAtajo) marcar(btnAtajo, false);
+      } else {
+        animarSalida(bala);
+        marcar(btnBala, false);
+        infoBalas.forEach((x) => animarSalida(x));
+        btnsBala.forEach((b) => b.setAttribute("aria-expanded", "false"));
+      }
+    });
+
+    // Cada ícono de bala abre SU panel al lado del minimapa: solo uno a la vez.
+    btnsBala.forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const yaAbierto = btn.getAttribute("aria-expanded") === "true";
+        btnsBala.forEach((b) => b.setAttribute("aria-expanded", "false"));
+        infoBalas.forEach((x) => {
+          if (!x.classList.contains("oculto") && x.id !== `info-bala-${btn.dataset.bala}`) {
+            animarSalida(x);
+          }
+        });
+        const target = $(`#info-bala-${btn.dataset.bala}`);
+        if (yaAbierto) {
+          animarSalida(target);
+        } else {
+          btn.setAttribute("aria-expanded", "true");
+          animarEntrada(target);
+        }
+      }),
+    );
+
     document.querySelectorAll<HTMLElement>("[data-cat]").forEach((b) =>
       b.addEventListener("click", () => {
-        ocultarListas();
+        const targetId = `lista-${b.dataset.cat}`;
+        document.querySelectorAll<HTMLElement>(".lista:not(.oculto)").forEach((l) => {
+          if (l.id !== targetId) animarSalida(l);
+        });
+        desmarcarCategorias();
         marcar(b, true);
         // El popup se cierra al elegir: si queda abierto tapa el primer video.
-        mini?.classList.add("oculto");
+        animarSalida(mini);
         if (btnAtajo) marcar(btnAtajo, false);
-        $(`#lista-${b.dataset.cat}`)?.classList.remove("oculto");
+        const target = $(`#${targetId}`);
+        animarEntrada(target);
       }),
     );
   </script>

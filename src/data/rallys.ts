@@ -84,7 +84,7 @@ export const rallys: Rally[] = [
   },
   {
     id: 'spiny-rally',
-    nombre: 'Rally Pinchos',
+    nombre: 'Rally Espinas',
     icono: '/img/rallys/spiny-rally.png',
     habilitado: false,
     pistasIds: [],
@@ -92,7 +92,7 @@ export const rallys: Rally[] = [
   },
   {
     id: 'cherry-rally',
-    nombre: 'Rally Cereza',
+    nombre: 'Rally Cerezas',
     icono: '/img/rallys/cherry-rally.png',
     habilitado: false,
     pistasIds: [],
