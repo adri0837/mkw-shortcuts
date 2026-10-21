@@ -41,6 +41,14 @@ const paraMenu = Object.fromEntries(
 );
 
 const rallysMapa = getRallysParaMapa();
+
+// El selector de rallys muestra 4 por página; el carrusel cicla entre ellas.
+const POR_PAGINA_RALLYS = 4;
+const paginasRallys = Array.from(
+  { length: Math.ceil(rallys.length / POR_PAGINA_RALLYS) },
+  (_, i) =>
+    rallys.slice(i * POR_PAGINA_RALLYS, (i + 1) * POR_PAGINA_RALLYS),
+);
 ---
 
 <Base>
@@ -54,66 +62,50 @@ const rallysMapa = getRallysParaMapa();
 
   <!-- MAPA: cada pista es un pin. Ajustá la posición con posMapa {x,y} (%) en src/data/pistas.ts -->
   <div class="mapa" id="contenedor-mapa">
-    <img src="/img/mapa-mundo.webp" alt="Mapa de Mario Kart World" />
+    <!-- Lente: el único nodo transformado en el zoom-to-fit del selector de
+         rallys. El contenedor recorta con overflow:hidden, así que el zoom
+         nunca se sale de la caja ni genera scrollbars. -->
+    <div class="mapa-lente" id="mapa-lente">
+      <img src="/img/mapa-mundo.webp" alt="Mapa de Mario Kart World" />
 
-    <!-- Capa SVG para dibujar las conexiones dinámicas de los rallys -->
-    <svg
-      id="svg-conexiones"
-      class="mapa-conexiones"
-      viewBox="0 0 100 100"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
-      <defs>
-        <filter id="glow-rally" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="0.8" result="blur"></feGaussianBlur>
-          <feMerge>
-            <feMergeNode in="blur"></feMergeNode>
-            <feMergeNode in="SourceGraphic"></feMergeNode>
-          </feMerge>
-        </filter>
-      </defs>
-      <g id="capa-lineas"></g>
-      <g id="capa-waypoints"></g>
-    </svg>
+      <!-- Capa SVG para dibujar las conexiones dinámicas de los rallys -->
+      <svg
+        id="svg-conexiones"
+        class="mapa-conexiones"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <defs>
+          <filter id="glow-rally" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="0.8" result="blur"></feGaussianBlur>
+            <feMerge>
+              <feMergeNode in="blur"></feMergeNode>
+              <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+          </filter>
+        </defs>
+        <g id="capa-lineas"></g>
+        <g id="capa-waypoints"></g>
+      </svg>
 
-    {
-      enElMapa().map((p) => (
-        <button
-          class="pin"
-          data-pista={p.id}
-          style={`left:${p.posMapa!.x}%;top:${p.posMapa!.y}%`}
-          aria-label={p.nombre}
-        >
-          <img src={imgDe(p, "icono")} alt="" />
-        </button>
-      ))
-    }
+      {
+        enElMapa().map((p) => (
+          <button
+            class="pin"
+            data-pista={p.id}
+            style={`left:${p.posMapa!.x}%;top:${p.posMapa!.y}%`}
+            aria-label={p.nombre}
+          >
+            <img src={imgDe(p, "icono")} alt="" />
+          </button>
+        ))
+      }
+    </div>
   </div>
 
-  <!-- SELECTOR DE MODO: Carreras vs Knockout Tour -->
-  <div class="selector-modo" role="tablist" aria-label="Modo de juego">
-    <button
-      type="button"
-      id="btn-modo-carreras"
-      class="btn btn-modo activo"
-      role="tab"
-      aria-selected="true"
-    >
-      Carreras
-    </button>
-    <button
-      type="button"
-      id="btn-modo-knockout"
-      class="btn btn-modo"
-      role="tab"
-      aria-selected="false"
-    >
-      Knockout Tour
-    </button>
-  </div>
-
-  <!-- SELECTOR DE RALLYS: Se muestra en modo Knockout Tour -->
+  <!-- SELECTOR DE RALLYS: Se muestra en modo Knockout Tour. Va debajo del
+       mapa y arriba de los botones de modo. -->
   <section
     id="panel-knockout"
     class="panel-rallys oculto"
@@ -122,7 +114,7 @@ const rallysMapa = getRallysParaMapa();
     <div class="rallys-cabecera">
       <h2 class="rallys-titulo">Elige un Rally</h2>
       <div class="rallys-paginacion-indicador">
-        <span id="rallys-pagina-texto">1 / 2</span>
+        <span id="rallys-pagina-texto">1 / {paginasRallys.length}</span>
       </div>
     </div>
 
@@ -132,55 +124,36 @@ const rallysMapa = getRallysParaMapa();
         id="btn-rally-prev"
         class="btn-carrusel btn-carrusel-izq"
         aria-label="Ver rallys anteriores"
-        disabled
       >
         <span aria-hidden="true">&#9664;</span>
       </button>
 
       <div class="rallys-viewport">
-        <!-- Página 1: Primeros 8 rallys -->
-        <div class="rallys-pagina pagina-activa" data-pagina="1">
-          {
-            rallys.slice(0, 8).map((r) => (
-              <a
-                href={r.habilitado ? `/rally/${r.id}` : undefined}
-                class={`rally-card ${r.habilitado ? "habilitado" : "deshabilitado"}`}
-                data-rally={r.id}
-                aria-disabled={!r.habilitado}
-              >
-                <div class="rally-card-icono-wrap">
-                  <img src={r.icono} alt="" class="rally-card-icono" />
-                </div>
-                <span class="rally-card-nombre">{r.nombre}</span>
-                {!r.habilitado && (
-                  <span class="badge-proximamente">Próximamente</span>
-                )}
-              </a>
-            ))
-          }
-        </div>
-
-        <!-- Página 2: Los otros 4 rallys restantes -->
-        <div class="rallys-pagina" data-pagina="2">
-          {
-            rallys.slice(8, 12).map((r) => (
-              <a
-                href={r.habilitado ? `/rally/${r.id}` : undefined}
-                class={`rally-card ${r.habilitado ? "habilitado" : "deshabilitado"}`}
-                data-rally={r.id}
-                aria-disabled={!r.habilitado}
-              >
-                <div class="rally-card-icono-wrap">
-                  <img src={r.icono} alt="" class="rally-card-icono" />
-                </div>
-                <span class="rally-card-nombre">{r.nombre}</span>
-                {!r.habilitado && (
-                  <span class="badge-proximamente">Próximamente</span>
-                )}
-              </a>
-            ))
-          }
-        </div>
+        {
+          paginasRallys.map((pagina, i) => (
+            <div
+              class={`rallys-pagina ${i === 0 ? "pagina-activa" : ""}`}
+              data-pagina={i + 1}
+            >
+              {pagina.map((r) => (
+                <a
+                  href={r.habilitado ? `/rally/${r.id}` : undefined}
+                  class={`rally-card ${r.habilitado ? "habilitado" : "deshabilitado"}`}
+                  data-rally={r.id}
+                  aria-disabled={!r.habilitado}
+                >
+                  <div class="rally-card-icono-wrap">
+                    <img src={r.icono} alt="" class="rally-card-icono" />
+                  </div>
+                  <span class="rally-card-nombre">{r.nombre}</span>
+                  {!r.habilitado && (
+                    <span class="badge-proximamente">Próximamente</span>
+                  )}
+                </a>
+              ))}
+            </div>
+          ))
+        }
       </div>
 
       <button
@@ -193,6 +166,30 @@ const rallysMapa = getRallysParaMapa();
       </button>
     </div>
   </section>
+
+  <!-- SELECTOR DE MODO: Carreras vs Knockout Tour -->
+  <div class="selector-modo" role="tablist" aria-label="Modo de juego">
+    <button
+      type="button"
+      id="btn-modo-carreras"
+      class="btn btn-modo activo"
+      role="tab"
+      aria-selected="true"
+    >
+      <img src="/img/copas/vs.webp" alt="" class="btn-modo-icono" />
+      Carreras
+    </button>
+    <button
+      type="button"
+      id="btn-modo-knockout"
+      class="btn btn-modo"
+      role="tab"
+      aria-selected="false"
+    >
+      <img src="/img/copas/ko.webp" alt="" class="btn-modo-icono" />
+      Knockout Tour
+    </button>
+  </div>
 
   <script
     type="application/json"
@@ -265,6 +262,7 @@ const rallysMapa = getRallysParaMapa();
     const lista = dlg.querySelector("ul")!;
 
     const contenedorMapa = document.getElementById("contenedor-mapa")!;
+    const lenteMapa = document.getElementById("mapa-lente")!;
     const capaLineas = document.getElementById("capa-lineas")!;
     const capaWaypoints = document.getElementById("capa-waypoints")!;
     const pines = document.querySelectorAll<HTMLElement>(".pin");
@@ -285,6 +283,88 @@ const rallysMapa = getRallysParaMapa();
       pines.forEach((pin) => pin.classList.remove("pin-rally-activo"));
       capaLineas.replaceChildren();
       capaWaypoints.replaceChildren();
+      lenteMapa.style.transform = "";
+    }
+
+    // Zoom-to-fit del mapa al bbox de las pistas del rally (hover/focus).
+    // Se transforma SOLO el lente: el rect del contenedor queda estable para
+    // medir y el recorte lo hace overflow:hidden del contenedor. El encuadre
+    // se centra en la porción del contenedor visible en pantalla, porque al
+    // hacer hover en las cards el mapa suele estar a media altura.
+    function enfocarRallyEnMapa(rallyId: string) {
+      const r = rallysData[rallyId];
+      if (!r || !r.pistas || r.pistas.length === 0) {
+        lenteMapa.style.transform = "";
+        return;
+      }
+
+      const rect = contenedorMapa.getBoundingClientRect();
+      const visTop = Math.max(rect.top, 0);
+      const visBot = Math.min(rect.top + rect.height, window.innerHeight);
+      const visH = visBot - visTop;
+      const visW = rect.width;
+      if (visH < 120 || visW < 80) {
+        lenteMapa.style.transform = "";
+        return;
+      }
+
+      const xs = r.pistas.map((p) => p.x);
+      const ys = r.pistas.map((p) => p.y);
+      const x0 = Math.min(...xs);
+      const x1 = Math.max(...xs);
+      const y0 = Math.min(...ys);
+      const y1 = Math.max(...ys);
+
+      const cx = ((x0 + x1) / 200) * rect.width;
+      const cy = ((y0 + y1) / 200) * rect.height;
+      const bw = Math.max(((x1 - x0) / 100) * rect.width, 1);
+      const bh = Math.max(((y1 - y0) / 100) * rect.height, 1);
+
+      const s = Math.max(
+        Math.min(Math.min((visW * 0.85) / bw, (visH * 0.85) / bh), 2.5),
+        0.5,
+      );
+
+      const cibleY = (visTop + visBot) / 2 - rect.top;
+      const tx = rect.width / 2 - s * cx;
+      const ty = cibleY - s * cy;
+
+      lenteMapa.style.transform = `translate(${tx}px, ${ty}px) scale(${s})`;
+    }
+
+    // Animación de aparición/desaparición del panel de rallys.
+    // Patrón igual al de pistas/[id].astro; genPanel invalida salidas
+    // pendientes si el usuario alterna de modo a mitad de animación.
+    const TIEMPO_ANIM_PANEL = 180;
+    let genPanel = 0;
+
+    function mostrarPanel() {
+      genPanel++;
+      panelKnockout.classList.remove("anim-sale", "oculto");
+      panelKnockout.classList.remove("anim-entra");
+      void panelKnockout.offsetWidth;
+      panelKnockout.classList.add("anim-entra");
+    }
+
+    function ocultarPanel() {
+      if (panelKnockout.classList.contains("oculto")) return;
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        panelKnockout.classList.add("oculto");
+        panelKnockout.classList.remove("anim-entra", "anim-sale");
+        return;
+      }
+      panelKnockout.classList.remove("anim-entra");
+      panelKnockout.classList.add("anim-sale");
+      const miGen = ++genPanel;
+      let terminado = false;
+      const fin = () => {
+        if (terminado || miGen !== genPanel) return;
+        terminado = true;
+        panelKnockout.classList.add("oculto");
+        panelKnockout.classList.remove("anim-sale");
+      };
+      panelKnockout.addEventListener("animationend", fin, { once: true });
+      setTimeout(fin, TIEMPO_ANIM_PANEL + 50);
     }
 
     function setModo(nuevoModo: "carreras" | "knockout") {
@@ -300,7 +380,11 @@ const rallysMapa = getRallysParaMapa();
       btnModoKnockout.classList.toggle("activo", esKnockout);
       btnModoKnockout.setAttribute("aria-selected", String(esKnockout));
 
-      panelKnockout.classList.toggle("oculto", !esKnockout);
+      if (esKnockout) {
+        mostrarPanel();
+      } else {
+        ocultarPanel();
+      }
       contenedorMapa.classList.toggle("modo-knockout", esKnockout);
 
       limpiarConexiones();
@@ -312,13 +396,18 @@ const rallysMapa = getRallysParaMapa();
       }
     }
 
+    const totalPaginasRallys = paginas.length;
+    let paginaActual = 1;
+
     function irAPagina(num: number) {
+      // Carrusel circular: de la última pasa a la primera y viceversa.
+      if (num < 1) num = totalPaginasRallys;
+      if (num > totalPaginasRallys) num = 1;
+      paginaActual = num;
       paginas.forEach((p) => {
         p.classList.toggle("pagina-activa", p.dataset.pagina === String(num));
       });
-      if (indicadorTexto) indicadorTexto.textContent = `${num} / 2`;
-      if (btnPrev) btnPrev.disabled = num === 1;
-      if (btnNext) btnNext.disabled = num === 2;
+      if (indicadorTexto) indicadorTexto.textContent = `${num} / ${totalPaginasRallys}`;
     }
 
     function dibujarConexiones(rallyId: string) {
@@ -483,15 +572,19 @@ const rallysMapa = getRallysParaMapa();
     btnModoKnockout.addEventListener("click", () => setModo("knockout"));
 
     if (btnPrev && btnNext) {
-      btnPrev.addEventListener("click", () => irAPagina(1));
-      btnNext.addEventListener("click", () => irAPagina(2));
+      btnPrev.addEventListener("click", () => irAPagina(paginaActual - 1));
+      btnNext.addEventListener("click", () => irAPagina(paginaActual + 1));
     }
 
     document.querySelectorAll<HTMLElement>(".rally-card").forEach((card) => {
       const rallyId = card.dataset.rally!;
-      card.addEventListener("mouseenter", () => dibujarConexiones(rallyId));
+      const entrar = () => {
+        dibujarConexiones(rallyId);
+        enfocarRallyEnMapa(rallyId);
+      };
+      card.addEventListener("mouseenter", entrar);
       card.addEventListener("mouseleave", () => limpiarConexiones());
-      card.addEventListener("focus", () => dibujarConexiones(rallyId));
+      card.addEventListener("focus", entrar);
       card.addEventListener("blur", () => limpiarConexiones());
     });
 
