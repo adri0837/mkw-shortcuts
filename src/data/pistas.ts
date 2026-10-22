@@ -39,7 +39,7 @@ export type Atajo = {
 export type Categoria = {
   id: string;
   nombre: string;
-  icono: string; // archivo dentro de /img/items/ ("" = sin ícono)
+  icono: string; // archivo dentro de /img/items/ o ruta absoluta (/img/...) ("" = sin ícono)
   atajos: Atajo[];
 };
 

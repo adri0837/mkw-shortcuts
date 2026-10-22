@@ -9,7 +9,8 @@ export function getStaticPaths() {
 
 const { r } = Astro.props as { r: Rally };
 const etapas = getPistasDeRally(r);
-const atajos = r.atajos ?? [];
+// Cada sección del carrusel cubre una etapa y la siguiente (la última, solo la final).
+const secciones = etapas.map((_, i) => etapas.slice(i, i + 2));
 ---
 
 <Base titulo={`${r.nombre} - Mario Kart World`}>
@@ -23,140 +24,259 @@ const atajos = r.atajos ?? [];
     </div>
   </header>
 
-  {
-    r.estrategia && (
-      <>
-        <div class="bloque-estrategia">
-          <h2 class="titulo-estrategia">
-            Estrategia de Rally
-            <button class="ayuda" aria-label="Qué es cada perfil" />
-          </h2>
-          <div class="roles">
-            <p>
-              <strong>Runner:</strong> Mejor posición de inicio, primer lugar y
-              correr.
-            </p>
-            <p>
-              <strong>Shroomer:</strong> Mejor iniciar en posiciones bajas o
-              medias, conseguir champiñones, tomar atajos y correr.
-            </p>
-            <p>
-              <strong>Drafter:</strong> Mejor conseguir rebufos al iniciar la
-              carrera, y entonces correr.
-            </p>
-            <p>
-              <strong>Bagger:</strong> Mejor quedarse en posiciones bajas y usar
-              tus objetos para remontar al final.
-            </p>
-          </div>
-        </div>
-        <p class="estrategia" set:html={r.estrategia} />
-      </>
-    )
-  }
+  <hr class="separador" />
 
-  <!-- CIRCUITO / RUTA DEL RALLY: Las 6 etapas en orden -->
+  <!-- SECCIONES DEL RALLY: carrusel con estrategia, cards A→B y atajos por sección -->
   {
-    etapas.length > 0 && (
+    secciones.length > 0 && (
       <section class="seccion-etapas">
-        <h2 class="titulo-seccion">Circuitos del Rally ({etapas.length} Etapas)</h2>
-        <div class="etapas-grid">
-          {etapas.map((p, idx) => (
-            <article class="etapa-card">
-              <div class="etapa-badge">Ronda {idx + 1}</div>
-              <a href={`/pistas/${p.id}`} class="etapa-link">
-                <img class="etapa-img" src={imgDe(p, "card")} alt={p.nombre} />
-                <div class="etapa-info">
-                  <img class="etapa-icono" src={imgDe(p, "icono")} alt="" />
-                  <span class="etapa-nombre">{p.nombre}</span>
+        <div class="rallys-carrusel-contenedor">
+          <button
+            type="button"
+            id="btn-seccion-prev"
+            class="btn-carrusel"
+            aria-label="Ver sección anterior"
+          >
+            <span aria-hidden="true">&#9664;</span>
+          </button>
+
+          <div class="rallys-viewport">
+            {secciones.map((pistasSeccion, i) => {
+              const contenido = r.secciones?.[i];
+              const seccionAtajos = contenido?.atajos ?? [];
+              return (
+                <div
+                  class={`seccion-slide ${i === 0 ? "pagina-activa" : ""}`}
+                  data-seccion={i + 1}
+                >
+                  <div class="seccion-columnas">
+                    <div class="seccion-texto">
+                      <h2 class="titulo-seccion">Sección {i + 1}</h2>
+                      {contenido?.estrategia && (
+                        <>
+                          <div class="bloque-estrategia">
+                            <h3 class="titulo-estrategia">
+                              Estrategia
+                              <button class="ayuda" aria-label="Qué es cada perfil" />
+                            </h3>
+                            <div class="roles">
+                              <p>
+                                <strong>Runner:</strong> Mejor posición de inicio, primer lugar y
+                                correr.
+                              </p>
+                              <p>
+                                <strong>Shroomer:</strong> Mejor iniciar en posiciones bajas o
+                                medias, conseguir champiñones, tomar atajos y correr.
+                              </p>
+                              <p>
+                                <strong>Drafter:</strong> Mejor conseguir rebufos al iniciar la
+                                carrera, y entonces correr.
+                              </p>
+                              <p>
+                                <strong>Bagger:</strong> Mejor quedarse en posiciones bajas y usar
+                                tus objetos para remontar al final.
+                              </p>
+                            </div>
+                          </div>
+                          <p class="estrategia" set:html={contenido.estrategia} />
+                        </>
+                      )}
+                    </div>
+                    <div class="seccion-cards">
+                      {pistasSeccion.map((p, j) => (
+                        <>
+                          {j > 0 && (
+                            <img
+                              class="seccion-flecha"
+                              src="/img/going-to.png"
+                              alt=""
+                            />
+                          )}
+                          <img
+                            class="seccion-card"
+                            src={imgDe(p, "card")}
+                            alt={p.nombre}
+                          />
+                        </>
+                      ))}
+                    </div>
+                  </div>
+
+                  {seccionAtajos.length > 0 && (
+                    <>
+                      <div class="acciones">
+                        <button class="btn btn-atajo" aria-pressed="false">
+                          Atajos
+                        </button>
+                        <div class="mini oculto">
+                          {seccionAtajos.map((c) => (
+                            <button class="btn" data-cat={c.id} aria-pressed="false">
+                              {c.icono && (
+                                <img
+                                  src={c.icono.startsWith("/") ? c.icono : `/img/items/${c.icono}`}
+                                  alt=""
+                                />
+                              )}
+                              {c.nombre}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {seccionAtajos.map((c) => (
+                        <section class="lista oculto" data-lista={c.id}>
+                          {c.atajos.map((a) => (
+                            <article class="atajo">
+                              {a.clip ? (
+                                <video
+                                  class="clip"
+                                  src={`${CLIPS_BASE}/${a.clip}`}
+                                  poster={`${CLIPS_BASE}/${a.clip.replace(/\.mp4$/, ".jpg")}`}
+                                  controls
+                                  preload="metadata"
+                                />
+                              ) : (
+                                <div class="clip">Clip pendiente</div>
+                              )}
+                              <div>
+                                <h3>{a.titulo}</h3>
+                                <p set:html={a.descripcion} />
+                              </div>
+                            </article>
+                          ))}
+                        </section>
+                      ))}
+                    </>
+                  )}
                 </div>
-              </a>
-            </article>
-          ))}
+              );
+            })}
+          </div>
+
+          <button
+            type="button"
+            id="btn-seccion-next"
+            class="btn-carrusel"
+            aria-label="Ver sección siguiente"
+          >
+            <span aria-hidden="true">&#9654;</span>
+          </button>
         </div>
       </section>
     )
   }
 
-  {
-    atajos.length > 0 && (
-      <>
-        <div class="acciones">
-          <button class="btn" id="btn-atajo" aria-pressed="false">
-            Atajos del Rally
-          </button>
-          <div id="mini" class="mini oculto">
-            {atajos.map((c) => (
-              <button class="btn" data-cat={c.id} aria-pressed="false">
-                {c.icono && <img src={`/img/items/${c.icono}`} alt="" />}
-                {c.nombre}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {atajos.map((c) => (
-          <section class="lista oculto" id={`lista-${c.id}`}>
-            {c.atajos.map((a) => (
-              <article class="atajo">
-                {a.clip ? (
-                  <video
-                    class="clip"
-                    src={`${CLIPS_BASE}/${a.clip}`}
-                    poster={`${CLIPS_BASE}/${a.clip.replace(/\.mp4$/, ".jpg")}`}
-                    controls
-                    preload="metadata"
-                  />
-                ) : (
-                  <div class="clip">Clip pendiente</div>
-                )}
-                <div>
-                  <h3>{a.titulo}</h3>
-                  <p set:html={a.descripcion} />
-                </div>
-              </article>
-            ))}
-          </section>
-        ))}
-      </>
-    )
-  }
+  <hr class="separador" />
 
   <script>
-    const btnAtajo = document.getElementById("btn-atajo");
-    const mini = document.getElementById("mini");
-    const botonesCat = mini ? mini.querySelectorAll<HTMLButtonElement>("button[data-cat]") : [];
-    const listas = document.querySelectorAll<HTMLElement>(".lista");
+    // Carrusel de secciones: botones ◀ ▶ para pasar de una sección a la siguiente.
+    const secciones = document.querySelectorAll<HTMLElement>(".seccion-slide");
+    const btnSeccionPrev = document.getElementById("btn-seccion-prev") as HTMLButtonElement | null;
+    const btnSeccionNext = document.getElementById("btn-seccion-next") as HTMLButtonElement | null;
+    let seccionActual = 1;
 
-    const alternar = (btn: HTMLElement, forzar?: boolean) => {
-      const activo = forzar ?? btn.getAttribute("aria-pressed") !== "true";
-      btn.setAttribute("aria-pressed", String(activo));
-      return activo;
+    if (secciones.length > 0 && btnSeccionPrev && btnSeccionNext) {
+      const irASeccion = (num: number) => {
+        // Carrusel circular: de la última pasa a la primera y viceversa.
+        if (num < 1) num = secciones.length;
+        if (num > secciones.length) num = 1;
+        seccionActual = num;
+        secciones.forEach((s) =>
+          s.classList.toggle("pagina-activa", s.dataset.seccion === String(num))
+        );
+      };
+      btnSeccionPrev.addEventListener("click", () => irASeccion(seccionActual - 1));
+      btnSeccionNext.addEventListener("click", () => irASeccion(seccionActual + 1));
+    }
+
+    // Mismas animaciones que la página de pistas: entrada/salida con fallback
+    // por si no llega animationend, y sin animar si el usuario pide menos motion.
+    const TIEMPO_ANIM = 180;
+
+    const animarEntrada = (el: HTMLElement | null) => {
+      if (!el) return;
+      el.classList.remove("anim-sale", "oculto");
+      el.classList.remove("anim-entra");
+      void el.offsetWidth;
+      el.classList.add("anim-entra");
     };
 
-    if (btnAtajo && mini) {
+    const animarSalida = (el: HTMLElement | null, alTerminar?: () => void) => {
+      if (!el || el.classList.contains("oculto")) {
+        alTerminar?.();
+        return;
+      }
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        el.classList.add("oculto");
+        el.classList.remove("anim-entra", "anim-sale");
+        alTerminar?.();
+        return;
+      }
+      el.classList.remove("anim-entra");
+      el.classList.add("anim-sale");
+      let terminado = false;
+      const fin = () => {
+        if (terminado) return;
+        terminado = true;
+        el.classList.add("oculto");
+        el.classList.remove("anim-sale");
+        alTerminar?.();
+      };
+      el.addEventListener("animationend", fin, { once: true });
+      setTimeout(fin, TIEMPO_ANIM + 50);
+    };
+
+    // Atajos: cada sección tiene su propio botón, menú y listas.
+    document.querySelectorAll(".seccion-slide").forEach((slide) => {
+      const btnAtajo = slide.querySelector<HTMLButtonElement>(".btn-atajo");
+      const mini = slide.querySelector<HTMLElement>(".mini");
+      if (!btnAtajo || !mini) return;
+
+      const botonesCat = mini.querySelectorAll<HTMLButtonElement>("button[data-cat]");
+      const listas = slide.querySelectorAll<HTMLElement>(".lista");
+
+      const marcar = (el: Element, on: boolean) =>
+        el.setAttribute("aria-pressed", String(on));
+      const desmarcarCategorias = () =>
+        botonesCat.forEach((b) => marcar(b, false));
+
+      const ocultarListas = () => {
+        slide.querySelectorAll<HTMLElement>(".lista:not(.oculto)").forEach((l) =>
+          animarSalida(l)
+        );
+        desmarcarCategorias();
+      };
+
       btnAtajo.addEventListener("click", () => {
-        const abierto = alternar(btnAtajo);
-        mini.classList.toggle("oculto", !abierto);
-        if (!abierto) {
-          listas.forEach((l) => l.classList.add("oculto"));
-          botonesCat.forEach((b) => b.setAttribute("aria-pressed", "false"));
+        const abrir = mini.classList.contains("oculto");
+        if (abrir) {
+          animarEntrada(mini);
+          marcar(btnAtajo, true);
+        } else {
+          animarSalida(mini);
+          marcar(btnAtajo, false);
+          ocultarListas();
         }
       });
 
       botonesCat.forEach((b) => {
         b.addEventListener("click", () => {
           const cat = b.dataset.cat;
-          const activa = alternar(b);
-          botonesCat.forEach((otro) => {
-            if (otro !== b) otro.setAttribute("aria-pressed", "false");
+          if (!cat) return;
+          // Solo una lista a la vez: la anterior sale animada.
+          slide.querySelectorAll<HTMLElement>(".lista:not(.oculto)").forEach((l) => {
+            if (l.dataset.lista !== cat) animarSalida(l);
           });
-          listas.forEach((l) =>
-            l.classList.toggle("oculto", l.id !== `lista-${cat}` || !activa)
-          );
+          desmarcarCategorias();
+          marcar(b, true);
+          // El popup se cierra al elegir: si queda abierto tapa el primer video.
+          animarSalida(mini);
+          marcar(btnAtajo, false);
+          const target = Array.from(listas).find((l) => l.dataset.lista === cat);
+          animarEntrada(target ?? null);
         });
       });
-    }
+    });
 
     document.getElementById("btn-volver-mapa")?.addEventListener("click", () => {
       sessionStorage.setItem("mkw_modo", "knockout");

@@ -1147,80 +1147,89 @@ video.clip {
    margin: 2rem 0;
 }
 
+.seccion-slide {
+   display: none;
+}
+
+.seccion-slide.pagina-activa {
+   display: block;
+   animation: paginaEntra .25s ease-out;
+}
+
 .titulo-seccion {
    font-size: 1.6rem;
    margin-bottom: 1.2rem;
    color: var(--texto);
 }
 
-.etapas-grid {
+/* El título de cada slide del carrusel va con la fuente del juego, en negro. */
+.seccion-slide .titulo-seccion {
+   font-family: "Racers Delight", "Trebuchet MS", sans-serif;
+   font-weight: 400;
+   font-style: normal;
+   color: #000;
+}
+
+.separador {
+   border: 0;
+   border-top: 1px solid var(--borde);
+   margin: 1.6rem 0;
+}
+
+/* Layout de cada sección: columna de texto (título + estrategia) y, a la derecha,
+   las cards de la pista A → flecha → pista B. */
+.seccion-columnas {
    display: grid;
-   grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-   gap: 1.2rem;
+   grid-template-columns: minmax(0, 1fr) auto;
+   gap: 1.5rem;
+   align-items: center;
 }
 
-.etapa-card {
-   position: relative;
-   background: var(--panel);
-   border: 2px solid var(--borde);
-   border-radius: var(--r);
-   overflow: hidden;
-   box-shadow: 0 4px 14px rgba(18, 32, 46, .08);
-   transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+/* El glosario de perfiles (popup del "?") es absoluto y se sale del slide: el
+   viewport del carrusel no recorta, si no en las secciones cortas se cortaba. */
+.seccion-etapas .rallys-viewport {
+   overflow: visible;
 }
 
-.etapa-card:hover {
-   transform: translateY(-3px);
-   border-color: var(--acento-borde);
-   box-shadow: 0 8px 20px rgba(18, 32, 46, .15);
-}
-
-.etapa-badge {
-   position: absolute;
-   top: .6rem;
-   left: .6rem;
-   background: rgba(18, 32, 46, .88);
-   color: var(--acento);
-   font-family: "Racers Delight", sans-serif;
-   font-size: .85rem;
-   padding: .25rem .65rem;
-   border-radius: 999px;
-   z-index: 2;
-   box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
-}
-
-.etapa-link {
-   display: block;
-   text-decoration: none;
-   color: inherit;
-}
-
-.etapa-img {
-   width: 100%;
-   aspect-ratio: 444 / 317;
-   object-fit: cover;
-   display: block;
-}
-
-.etapa-info {
+.seccion-cards {
    display: flex;
    align-items: center;
+   justify-content: flex-end;
    gap: .8rem;
-   padding: .8rem 1rem;
-   background: var(--panel);
+   flex-wrap: wrap;
 }
 
-.etapa-icono {
-   width: 2.2rem;
-   height: 2.2rem;
-   object-fit: contain;
-   flex-shrink: 0;
+.seccion-card {
+   display: block;
+   width: clamp(120px, 18vw, 240px);
+   height: auto;
+   border-radius: var(--r);
 }
 
-.etapa-nombre {
-   font-family: "Racers Delight", sans-serif;
-   font-size: 1.15rem;
-   color: var(--texto);
+.seccion-flecha {
+   width: clamp(2rem, 5vw, 4rem);
+   height: auto;
+}
+
+/* La última sección lleva una sola card: la columna de cards se reparte a la
+   mitad y la card queda centrada en ella. :where baja la especificidad para
+   que el media query de abajo siga ganando en móvil. */
+.seccion-columnas:where(:has(.seccion-cards > img:only-child)) {
+   grid-template-columns: minmax(0, 1fr) 1fr;
+}
+
+.seccion-cards:has(> img:only-child) {
+   justify-content: center;
+}
+
+@media(max-width:750px) {
+   .seccion-columnas {
+      grid-template-columns: 1fr;
+   }
+
+   .seccion-cards {
+      justify-content: center;
+   }
 }
 
 @media(max-width:800px) {
